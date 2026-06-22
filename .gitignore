@@ -1,0 +1,12 @@
+# Source material — contains the UNSCRUBBED résumé (phone + references' emails).
+# Kept local only; never publish.
+Reference/
+
+# Claude Code local config
+.claude/
+
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+desktop.ini
+*~
