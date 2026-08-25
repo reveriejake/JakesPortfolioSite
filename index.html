@@ -3,293 +3,490 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jacob Fletcher — Unity Game Developer & Technical Artist</title>
+  <title>Jacob Fletcher — Unity Game Developer &amp; Technical Artist</title>
   <meta name="description" content="Jacob Fletcher — Unity Game Developer, VR/XR Engineer, and Technical Artist. Production experience across gameplay, multiplayer, real-time 3D, and tools." />
   <meta property="og:title" content="Jacob Fletcher — Unity Game Developer & Technical Artist" />
   <meta property="og:description" content="Unity developer and technical artist. VR/XR, multiplayer, real-time 3D, tools." />
   <meta property="og:image" content="assets/headshot.png" />
   <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#08061a" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
-  <!-- ===== Header / Nav ===== -->
-  <header class="site-header">
-    <div class="container nav-inner">
-      <a href="#top" class="brand" data-tab="resume">
-        <span class="brand-mark">JF</span>
-        <span class="brand-name">Jacob&nbsp;Fletcher</span>
-      </a>
-      <nav class="tabs" role="tablist" aria-label="Primary">
-        <button class="tab is-active" data-tab="resume" role="tab" aria-selected="true">Resume</button>
-        <button class="tab" data-tab="portfolio" role="tab" aria-selected="false">Portfolio</button>
-      </nav>
-    </div>
-  </header>
-
-  <main id="top">
+<body id="top">
+  <main>
     <!-- ============================================================= -->
-    <!-- RESUME TAB                                                    -->
+    <!-- 1. DEMO REEL                                                  -->
     <!-- ============================================================= -->
-    <section id="resume" class="tab-panel is-active" role="tabpanel">
+    <section id="reel" class="reel">
+      <div class="container reel-inner">
+        <div class="reel-head">
+          <p class="eyebrow">VR/XR Engineer · Unity Game Developer · Technical Artist</p>
+          <h1>Jacob Fletcher</h1>
+          <p class="lead">
+            Seven years building <strong>VR/XR</strong> in production — senior VR engineering at
+            <strong>ACE</strong>, HoloLens and immersive prototypes at <strong>Microsoft</strong>.
+            I work across gameplay, multiplayer, real-time 3D, technical art, and the tools
+            that bring them together.
+          </p>
+          <ul class="cred-row">
+            <li><span class="cred-key">ACE</span> Senior VR/XR Engineer · scaled 150 → <strong>50,000+</strong> monthly users</li>
+            <li><span class="cred-key">Microsoft</span> HoloLens XR developer &amp; senior technical artist</li>
+          </ul>
+        </div>
 
-      <!-- Hero -->
-      <div class="hero">
-        <div class="container hero-inner">
-          <div class="hero-photo">
+        <div class="reel-stage">
+          <div class="video-embed">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/4gKCksgTrr0?rel=0"
+              title="Jake Fletcher — 2026 Demo Reel"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
+          </div>
+          <div class="reel-caption">
+            <span class="tag tag-new">2026 Demo Reel</span>
+            <p>VR/XR gameplay, technical art, and real-time 3D from production work at <strong>ACE</strong> and <strong>Microsoft</strong>.</p>
+          </div>
+        </div>
+
+        <div class="reel-actions">
+          <a class="btn btn-primary" href="#projects">See the Work</a>
+          <a class="btn btn-ghost" href="assets/Jake_Fletcher_Resume_2026.pdf" target="_blank" rel="noopener">Download Résumé (PDF)</a>
+          <a class="btn btn-ghost" href="https://linkedin.com/in/jacobfletcher" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="container content">
+
+      <!-- ============================================================= -->
+      <!-- 2. ABOUT ME                                                   -->
+      <!-- ============================================================= -->
+      <section id="about" class="block">
+        <h2 class="block-title" data-index="01">About Me</h2>
+        <div class="about-inner">
+          <div class="about-photo">
             <img src="assets/headshot.png" alt="Photo of Jacob Fletcher" width="320" height="320" />
           </div>
-          <div class="hero-text">
-            <p class="eyebrow">Unity Game Developer · VR/XR Engineer · Technical Artist</p>
-            <h1>Jacob Fletcher</h1>
-            <p class="lead">
-              Long-time Unity developer and technical artist with production experience
-              across gameplay programming, VR/XR, multiplayer, real-time 3D rendering,
-              UI, tools, and backend integration — shipping production features for
-              <strong>ACE</strong> and <strong>Microsoft</strong>.
+          <div class="about-text">
+            <p class="prose">
+              I’m a <strong>creative technologist</strong> specializing in real-time 3D, <strong>VR/XR</strong>,
+              and interactive experiences. Most of my career has been spent working at the intersection of
+              engineering, technical art, and production — turning ideas into experiences that actually work
+              in the real world.
             </p>
-            <div class="hero-actions">
-              <button class="btn btn-primary" data-tab="portfolio">View Portfolio</button>
-              <a class="btn btn-accent" href="mailto:reveriejake87@gmail.com?subject=Hello%20Jacob">✉ Email Me</a>
-              <a class="btn btn-ghost" href="assets/Jake_Fletcher_Resume_2026.pdf" target="_blank" rel="noopener">Download Résumé (PDF)</a>
-            </div>
+            <p class="prose">
+              Most recently, I was a Senior Software Engineer, VR/XR at <strong>ACE</strong>, where I helped
+              develop and scale live-service <strong>VR</strong> experiences from roughly 150 users to
+              <strong>almost 50,000 monthly users</strong>. Before that, I worked at <strong>Microsoft</strong>,
+              building <strong>HoloLens</strong> experiences and immersive prototypes before moving into
+              technical art and production for Azure’s executive communications.
+            </p>
+            <p class="prose">
+              My work covers everything from <strong>VR interaction</strong>, gameplay and multiplayer to
+              rendering, 3D content, UI, tools, optimization, and backend systems. I’ve also shipped dozens
+              of mobile games across iOS and Android and released several Unity Asset Store tools.
+            </p>
+            <p class="prose">
+              What I bring is the ability to move between disciplines when a project needs it. I can write
+              the code, build the tools, solve the rendering problem, work with artists and designers, and
+              help turn a rough idea into a polished, production-ready experience.
+            </p>
             <ul class="contact-row">
+              <li><a href="mailto:reveriejake87@gmail.com">reveriejake87@gmail.com</a></li>
               <li><a href="https://linkedin.com/in/jacobfletcher" target="_blank" rel="noopener">LinkedIn</a></li>
-              <li><a href="https://www.youtube.com/watch?v=4gKCksgTrr0" target="_blank" rel="noopener">Demo Reel</a></li>
+              <li><a href="https://www.youtube.com/@jaflegames" target="_blank" rel="noopener">YouTube</a></li>
             </ul>
           </div>
         </div>
-      </div>
 
-      <div class="container content">
+      </section>
 
-        <!-- Profile -->
-        <section class="block">
-          <h2 class="block-title">Profile</h2>
-          <p class="prose">
-            I am a long-time Unity developer and technical artist with production experience across
-            gameplay programming, VR/XR, multiplayer, 3D rendering, 3D content, UI, tools, and backend
-            integration. I have built production features for ACE and Microsoft. At ACE I helped scale our
-            player base from roughly 150 users to <strong>50,000+ monthly users</strong>, all as live services.
-            I shipped over a dozen independent mobile games and released multiple Unity Asset Store tools for
-            other indie developers to use. I am a strong fit for any team that needs someone who can move
-            between engineering, technical art, optimization, and production-ready implementation.
-          </p>
-        </section>
+      <!-- ============================================================= -->
+      <!-- 3. WORK HISTORY                                               -->
+      <!-- ============================================================= -->
+      <section id="experience" class="block">
+        <h2 class="block-title" data-index="02">Work History</h2>
+        <div class="timeline">
 
-        <!-- Core Skills -->
-        <section class="block">
-          <h2 class="block-title">Core Skills</h2>
-          <div class="skills-grid">
-            <div class="skill-card">
-              <h3>Unity / C#</h3>
-              <p>Gameplay systems, UI design, gameplay optimizations, editor and asset tools.</p>
+          <article class="job is-key">
+            <div class="job-head">
+              <h3>Senior Software Engineer, VR/XR <span class="at">· ACE</span></h3>
+              <span class="job-dates">Jul 2023 – May 2026</span>
             </div>
-            <div class="skill-card">
-              <h3>VR/XR · Multiplayer</h3>
-              <p>Quest, HoloLens, Photon, and Mirror.</p>
-            </div>
-            <div class="skill-card">
-              <h3>Technical Art</h3>
-              <p>Shader Graph, compute, modeling, animation, rigging.</p>
-            </div>
-            <div class="skill-card">
-              <h3>Production Tools</h3>
-              <p>Git, Jira, Maya, Blender, Cinema 4D, Photoshop.</p>
-            </div>
-            <div class="skill-card">
-              <h3>Backend / Services</h3>
-              <p>Server migration from Bubble to AWS, backend API integration.</p>
-            </div>
-            <div class="skill-card">
-              <h3>Game Dev Focus</h3>
-              <p>Weapons, projectiles, customization, asset pipelines, performance optimizations.</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Experience -->
-        <section class="block">
-          <h2 class="block-title">Professional Experience</h2>
-          <div class="timeline">
-
-            <article class="job">
-              <div class="job-head">
-                <h3>Senior Software Engineer, VR/XR <span class="at">· ACE</span></h3>
-                <span class="job-dates">Jul 2023 – May 2026</span>
-              </div>
-              <ul>
-                <li>Joined at an early stage with roughly 150 users and helped scale the product to <strong>50,000+ monthly users</strong> by shipping production Unity features, stabilizing workflows, and improving front-end architecture.</li>
-                <li>Refactored major portions of the game from the ground up — improving maintainability, scalability, performance, and day-to-day iteration speed for gameplay, UI, and VR/XR systems.</li>
-                <li>Implemented Photon PUN multiplayer systems, VR interactions, customizable weapons, projectile behavior, player-facing UI, and internal gameplay tooling.</li>
-                <li>Built editor workflows, 3D assets, materials, and technical-art pipeline support that helped engineering, art, and product teams iterate faster on production-ready content.</li>
-                <li>Integrated Unity client code with Bubble services and supported the Bubble-to-AWS migration — subscriptions, user management, API integration, Git/Jira delivery, and production issue resolution.</li>
-                <li>Used AI tools such as Claude and ChatGPT for code review, optimization passes, debugging support, and refactoring analysis while retaining final engineering ownership.</li>
-              </ul>
-            </article>
-
-            <article class="job">
-              <div class="job-head">
-                <h3>Senior Technical Artist &amp; Producer <span class="at">· Microsoft</span></h3>
-                <span class="job-dates">Jun 2020 – May 2023</span>
-              </div>
-              <ul>
-                <li>Supported executive-level Azure communications, quarterly all-hands, weekly fireside chats, video production, and high-visibility presentations — coordinating complex technical and creative requirements.</li>
-                <li>Owned end-to-end production workflows for live and recorded communications, balancing creative direction, technical setup, editing, asset delivery, stakeholder feedback, and deadline-driven execution.</li>
-                <li>Created motion graphics, 3D art, animation, rendered visuals, photo/video edits, and live-event assets using Maya, Cinema 4D, Blender, Adobe tools, OBS, and Teams broadcast workflows.</li>
-              </ul>
-            </article>
-
-            <article class="job">
-              <div class="job-head">
-                <h3>Unity Developer, VR/XR <span class="at">· Microsoft / Robert Half</span></h3>
-                <span class="job-dates">Feb 2019 – Jun 2020</span>
-              </div>
-              <ul>
-                <li>Built Unity-based HoloLens demos, immersive prototypes, 3D models, animations, rendered videos, and presentation-ready XR experiences alongside optical engineers, creative leadership, and product stakeholders.</li>
-                <li>Translated technical product concepts into interactive experiences and visual prototypes that communicated device capabilities, UX direction, and spatial-computing interaction models.</li>
-              </ul>
-            </article>
-
-            <article class="job">
-              <div class="job-head">
-                <h3>Freelance Game Developer <span class="at">· Independent</span></h3>
-                <span class="job-dates">2008 – Present</span>
-              </div>
-              <ul>
-                <li>Over a decade of independent work across many projects. Created the Unity 2.0 Terrain demo for Unity's 2.0 release, shipped over a dozen independent mobile games, and released 2 successful Unity Asset Store assets.</li>
-              </ul>
-            </article>
-
-          </div>
-        </section>
-
-        <!-- References -->
-        <section class="block">
-          <h2 class="block-title">References</h2>
-          <div class="refs-grid">
-            <div class="ref-card">
-              <p class="ref-name">Aaron Lee</p>
-              <p class="ref-role">Founder · AceXR</p>
-              <a href="https://www.linkedin.com/in/aaleeron/" target="_blank" rel="noopener">LinkedIn</a>
-            </div>
-            <div class="ref-card">
-              <p class="ref-name">Chris Klingler</p>
-              <p class="ref-role">CTO · AceXR</p>
-              <a href="https://www.linkedin.com/in/chrisklingler/" target="_blank" rel="noopener">LinkedIn</a>
-            </div>
-            <div class="ref-card">
-              <p class="ref-name">Sara Zin</p>
-              <p class="ref-role">Creative Director · Microsoft</p>
-              <a href="https://www.linkedin.com/in/sarazin1/" target="_blank" rel="noopener">LinkedIn</a>
-            </div>
-            <div class="ref-card">
-              <p class="ref-name">Sadie Shields</p>
-              <p class="ref-role">Senior Design · Microsoft</p>
-              <a href="https://www.linkedin.com/in/sadie-shields-ba52a353/" target="_blank" rel="noopener">LinkedIn</a>
-            </div>
-          </div>
-          <p class="note">Contact details available on request.</p>
-        </section>
-
-      </div>
-    </section>
-
-    <!-- ============================================================= -->
-    <!-- PORTFOLIO TAB                                                 -->
-    <!-- ============================================================= -->
-    <section id="portfolio" class="tab-panel" role="tabpanel" hidden>
-      <div class="container content">
-        <header class="section-head">
-          <p class="eyebrow">Selected Work</p>
-          <h2>Portfolio</h2>
-          <p class="prose">
-            A mix of reels and a recent personal project. The newest work is
-            <strong>Studio Legends</strong> — a game I'm building solo.
-          </p>
-        </header>
-
-        <!-- Featured: Studio Legends game -->
-        <div class="featured-card">
-          <div class="featured-text">
-            <p class="eyebrow">New Game · In Development</p>
-            <h3>Studio Legends</h3>
-            <p>
-              My current personal project — a game built from the ground up in Unity, featuring
-              custom building and terrain systems. Follow development and play the latest build.
+            <p class="job-tags">
+              <span class="tag tag-vr">VR/XR</span>
+              <span class="tag">Photon Multiplayer</span>
+              <span class="tag">Unity / C#</span>
+              <span class="tag">Live Service</span>
             </p>
-            <div class="featured-actions">
-              <a class="btn btn-primary" href="https://playstudiolegends.com" target="_blank" rel="noopener">Visit playstudiolegends.com →</a>
-              <a class="btn btn-ghost" href="https://www.youtube.com/watch?v=ALbZ9YaurHw" target="_blank" rel="noopener">Watch the techlog</a>
+            <ul>
+              <li>Joined this <strong>VR</strong> product at an early stage with roughly 150 users and helped scale it to <strong>50,000+ monthly users</strong> by shipping production Unity features, stabilizing workflows, and improving front-end architecture.</li>
+              <li>Refactored major portions of the game from the ground up — improving maintainability, scalability, performance, and day-to-day iteration speed for gameplay, UI, and <strong>VR/XR</strong> systems.</li>
+              <li>Implemented Photon PUN multiplayer systems, <strong>VR interactions</strong>, customizable weapons, projectile behavior, player-facing UI, and internal gameplay tooling.</li>
+              <li>Built editor workflows, 3D assets, materials, and technical-art pipeline support that helped engineering, art, and product teams iterate faster on production-ready content.</li>
+              <li>Integrated Unity client code with Bubble services and supported the Bubble-to-AWS migration — subscriptions, user management, API integration, Git/Jira delivery, and production issue resolution.</li>
+              <li>Used AI tools such as Claude and ChatGPT for code review, optimization passes, debugging support, and refactoring analysis while retaining final engineering ownership.</li>
+            </ul>
+          </article>
+
+          <article class="job is-key">
+            <div class="job-head">
+              <h3>Senior Technical Artist &amp; Producer <span class="at">· Microsoft</span></h3>
+              <span class="job-dates">Jun 2020 – May 2023</span>
             </div>
+            <p class="job-tags">
+              <span class="tag">Technical Art</span>
+              <span class="tag">3D / Motion</span>
+              <span class="tag">Azure Comms</span>
+            </p>
+            <ul>
+              <li>Supported executive-level Azure communications, quarterly all-hands, weekly fireside chats, video production, and high-visibility presentations — coordinating complex technical and creative requirements.</li>
+              <li>Owned end-to-end production workflows for live and recorded communications, balancing creative direction, technical setup, editing, asset delivery, stakeholder feedback, and deadline-driven execution.</li>
+              <li>Created motion graphics, 3D art, animation, rendered visuals, photo/video edits, and live-event assets using Maya, Cinema 4D, Blender, Adobe tools, OBS, and Teams broadcast workflows.</li>
+            </ul>
+          </article>
+
+          <article class="job is-key">
+            <div class="job-head">
+              <h3>Unity Developer, VR/XR <span class="at">· Microsoft / Robert Half</span></h3>
+              <span class="job-dates">Feb 2019 – Jun 2020</span>
+            </div>
+            <p class="job-tags">
+              <span class="tag tag-vr">VR/XR</span>
+              <span class="tag">HoloLens</span>
+              <span class="tag">Spatial Computing</span>
+            </p>
+            <ul>
+              <li>Built Unity-based <strong>HoloLens</strong> demos, immersive prototypes, 3D models, animations, rendered videos, and presentation-ready <strong>XR experiences</strong> alongside optical engineers, creative leadership, and product stakeholders.</li>
+              <li>Translated technical product concepts into interactive experiences and visual prototypes that communicated device capabilities, UX direction, and spatial-computing interaction models.</li>
+            </ul>
+          </article>
+
+          <article class="job">
+            <div class="job-head">
+              <h3>Lead Maintenance Mechanic A <span class="at">· Boeing</span></h3>
+              <span class="job-dates">Jul 2008 – Feb 2019</span>
+            </div>
+            <p class="job-tags">
+              <span class="tag">Team Lead</span>
+              <span class="tag">Robotics</span>
+              <span class="tag">CNC</span>
+              <span class="tag">Preventative Maintenance</span>
+            </p>
+            <ul>
+              <li>Led a team of mechanics — assigning tasks, planning work, and coordinating day-to-day coverage.</li>
+              <li>Created preventative maintenance plans that kept production equipment running and reduced unplanned downtime.</li>
+              <li>Responded to reactive calls to repair <strong>robotics and CNC machines</strong> on the production floor.</li>
+              <li>Troubleshot issues with robotics and CNC machines, diagnosing faults and returning equipment to service.</li>
+            </ul>
+          </article>
+
+          <article class="job">
+            <div class="job-head">
+              <h3>Freelance Game Developer <span class="at">· Independent</span></h3>
+              <span class="job-dates">2008 – Present</span>
+            </div>
+            <ul>
+              <li>Over a decade of independent work across many projects. Created the Unity 2.0 Terrain demo for Unity's 2.0 release, shipped over a dozen independent mobile games, and released 2 successful Unity Asset Store assets.</li>
+            </ul>
+          </article>
+
+          <article class="job">
+            <div class="job-head">
+              <h3>Stagehand · Photographer · Cook · Luthier <span class="at">· Early Career</span></h3>
+              <span class="job-dates">Jan 2004 – Jul 2008</span>
+            </div>
+            <p class="job-tags">
+              <span class="tag">Live Events</span>
+              <span class="tag">Photography</span>
+              <span class="tag">Hospitality</span>
+              <span class="tag">Instrument Making</span>
+            </p>
+            <ul>
+              <li>Worked as a stagehand setting up stage equipment for bands.</li>
+              <li>Photographer for hire, running my own studio in an art center.</li>
+              <li>Cooked at various sit-down restaurants.</li>
+              <li>Worked as a luthier building harps for Rees Harps.</li>
+            </ul>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ============================================================= -->
+      <!-- 4. PROJECTS                                                   -->
+      <!-- ============================================================= -->
+      <section id="projects" class="block">
+        <h2 class="block-title" data-index="03">Projects</h2>
+        <p class="prose section-intro">
+          Shipped products, games, and tools — from live-service <strong>VR</strong> to indie
+          mobile titles and Unity Asset Store releases.
+        </p>
+
+        <div class="project-list">
+
+          <article class="project">
+            <div class="project-media is-portrait">
+              <img src="assets/ace.jpg" alt="A shooter in a Quest headset aiming a tracked pistol at a steel target on a virtual range" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">ACE</h3>
+              <p class="project-desc">
+                Live-service <strong>VR</strong> shooting-sports training built in Unity — headset-based
+                marksmanship on virtual ranges. Joined at roughly 150 users and helped scale the product
+                to almost 50,000 monthly users.
+              </p>
+              <p class="project-date">Jul 2023 – May 2026</p>
+              <div class="project-actions">
+                <a class="btn btn-primary" href="https://www.acexr.com/" target="_blank" rel="noopener">Visit acexr.com →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <div class="video-embed">
+                <button class="lite-yt" type="button"
+                        data-yt="ALbZ9YaurHw"
+                        data-yt-title="Studio Legends — Techlog: Building &amp; Terrain Systems"
+                        aria-label="Play the Studio Legends techlog">
+                  <img src="https://i.ytimg.com/vi/ALbZ9YaurHw/maxresdefault.jpg" alt="" loading="lazy" />
+                  <span class="play-badge" aria-hidden="true">▶</span>
+                </button>
+              </div>
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">Studio Legends</h3>
+              <p class="project-desc">
+                A game built from the ground up in Unity, featuring custom building and terrain
+                systems. The techlog walks through the real-time systems behind it.
+              </p>
+              <p class="project-date">In development</p>
+              <div class="project-actions">
+                <a class="btn btn-primary" href="https://playstudiolegends.com" target="_blank" rel="noopener">Visit playstudiolegends.com →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/bookjake.jpg" alt="BookJake.com — a dark landing page reading Build something. Get a number., with service tiles priced by hours" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <p class="project-tags"><span class="tag tag-ai">AI-assisted</span></p>
+              <h3 class="project-name">BookJake.com</h3>
+              <p class="project-desc">
+                My own booking and estimating site. Describe what you want built and get a number in
+                under a minute; submit it and it becomes a written scope and a fixed-fee proposal — no
+                sales call, no email gate. Work is priced as deliverables and milestones, with live
+                availability from a calendar.
+              </p>
+              <p class="project-date">2026</p>
+              <div class="project-actions">
+                <a class="btn btn-primary" href="https://bookjake.com" target="_blank" rel="noopener">Visit bookjake.com →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/aupex.jpg" alt="Aupex.dev — a talent marketplace landing page beside a structured statement of work with milestones and costs" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <p class="project-tags"><span class="tag tag-ai">AI-assisted</span></p>
+              <h3 class="project-name">Aupex.dev</h3>
+              <p class="project-desc">
+                A marketplace connecting companies with senior engineering, art, and production talent
+                for project-based work. Every bid arrives as the same structured statement of work, so
+                milestones carry their own hours, dates, and cost — the total is derived rather than
+                asserted, and assumptions and exclusions are first-class fields agreed before work starts.
+              </p>
+              <p class="project-date">2026</p>
+              <div class="project-actions">
+                <a class="btn btn-primary" href="https://aupex.dev" target="_blank" rel="noopener">Visit aupex.dev →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/sow-generator.jpg" alt="SOW Builder — a deliverables form on the left rendering a live statement of work preview on the right" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <p class="project-tags"><span class="tag tag-ai">AI-assisted</span></p>
+              <h3 class="project-name">SOW Generator</h3>
+              <p class="project-desc">
+                A statement-of-work builder. Fill in parties, rate, and deliverables and it renders a
+                formatted SOW live beside the form, totalling hours and cost as you type. Drafts with
+                AI, and exports to PDF, Markdown, or JSON.
+              </p>
+              <p class="project-date">2026</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media is-portrait">
+              <img src="assets/balencil.jpg" alt="Balencil title screen — a mahogany pencil balanced against a green forest backdrop" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">Balencil</h3>
+              <p class="project-desc">
+                A one-touch mobile balancing game — keep a hand-drawn pencil upright against the
+                wind. Unlockable pencil skins, an eraser currency, daily rewards, and leaderboards.
+              </p>
+              <p class="project-date">Date TBD</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media is-portrait">
+              <img src="assets/overlap.jpg" alt="Overlap gameplay — white pieces landing inside a ring of green targets" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">Overlap</h3>
+              <p class="project-desc">
+                A minimalist timing game — land each piece cleanly inside the ring without overlapping
+                the last. Stars earned per run unlock alternate color themes and shape sets.
+              </p>
+              <p class="project-date">Date TBD</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/sol-defender.jpg" alt="Sol Defender — a glowing sun ringed by orbital lanes of red and blue nodes" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">Sol Defender</h3>
+              <p class="project-desc">
+                An arcade space-defense game — hold off waves closing in on the sun along orbital
+                lanes, spending Dark Matter on weapon and shield upgrades as the levels escalate.
+              </p>
+              <p class="project-date">Date TBD</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/dollar-origami.png" alt="Dollar Origami — a duck folded from a dollar bill, with step and difficulty controls" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">Dollar Origami</h3>
+              <p class="project-desc">
+                A step-by-step guide to folding origami from dollar bills — models rated by difficulty
+                and bill count, walked through one fold at a time.
+              </p>
+              <p class="project-date">Date TBD</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/balloon-animals.jpg" alt="Balloon Animals — a red balloon dog animating in 3D against a blue sky" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">Balloon Animals</h3>
+              <p class="project-desc">
+                A kids' app of balloon animals animated in 3D — twist-by-twist playback of each build,
+                with simple controls for browsing the collection.
+              </p>
+              <p class="project-date">Date TBD</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/ansel-and-clair.webp" alt="Ansel &amp; Clair — an illustrated exploration scene with a camera tool and travel log prompts" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">Ansel &amp; Clair: Jurassic Dinosaurs</h3>
+              <p class="project-desc">
+                An educational adventure app — explore an illustrated world, photograph what you find,
+                and arrange the shots in a travel log to repair the ship and get Ansel and Clair home.
+              </p>
+              <p class="project-date">Date TBD</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/project-stardust.png" alt="Project Stardust running on an iPad — glowing arcs traced across a night sky above a city skyline" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">Project Stardust</h3>
+              <p class="project-desc">
+                A touch arcade game played across a night sky above a city skyline — trace arcs to
+                catch falling stars and chain them into score multipliers before your lives run out.
+              </p>
+              <p class="project-date">Date TBD</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/editor-tool.jpg" alt="2DVLS editor tool — Unity scene view beside its C# source in Visual Studio" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">2DVLS</h3>
+              <p class="project-desc">
+                2D volumetric lights and shadows for Unity, released on the Unity Asset Store —
+                real-time light meshes with a custom editor for authoring them in the scene view.
+              </p>
+              <p class="project-date">Date TBD</p>
+            </div>
+          </article>
+
+          <article class="project">
+            <div class="project-media">
+              <img src="assets/quickropes.jpg" alt="QuickRopes key art — a rendered rope threaded between two stone blocks" loading="lazy" />
+            </div>
+            <div class="project-body">
+              <h3 class="project-name">QuickRopes</h3>
+              <p class="project-desc">
+                A Unity Asset Store editor extension for building ropes, chains, and cables —
+                editable spline control points, rigidbody and joint tuning, and a procedural
+                link/tube mesh renderer, all authored in the scene view.
+              </p>
+              <p class="project-date">2015</p>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- References -->
+      <section id="references" class="block">
+        <h2 class="block-title" data-index="04">References</h2>
+        <div class="refs-grid">
+          <div class="ref-card">
+            <p class="ref-name">Aaron Lee</p>
+            <p class="ref-role">Founder · AceXR</p>
+            <a href="https://www.linkedin.com/in/aaleeron/" target="_blank" rel="noopener">LinkedIn</a>
           </div>
-          <div class="featured-media">
-            <a href="https://www.youtube.com/watch?v=ALbZ9YaurHw" target="_blank" rel="noopener">
-              <img src="https://i.ytimg.com/vi/ALbZ9YaurHw/hqdefault.jpg" alt="Studio Legends techlog thumbnail" loading="lazy" />
-              <span class="play-badge" aria-hidden="true">▶</span>
-            </a>
+          <div class="ref-card">
+            <p class="ref-name">Chris Klingler</p>
+            <p class="ref-role">CTO · AceXR</p>
+            <a href="https://www.linkedin.com/in/chrisklingler/" target="_blank" rel="noopener">LinkedIn</a>
+          </div>
+          <div class="ref-card">
+            <p class="ref-name">Sara Zin</p>
+            <p class="ref-role">Creative Director · Microsoft</p>
+            <a href="https://www.linkedin.com/in/sarazin1/" target="_blank" rel="noopener">LinkedIn</a>
+          </div>
+          <div class="ref-card">
+            <p class="ref-name">Sadie Shields</p>
+            <p class="ref-role">Senior Design · Microsoft</p>
+            <a href="https://www.linkedin.com/in/sadie-shields-ba52a353/" target="_blank" rel="noopener">LinkedIn</a>
           </div>
         </div>
+        <p class="note">Contact details available on request.</p>
+      </section>
 
-        <!-- Video grid -->
-        <div class="video-grid">
-
-          <article class="video-card">
-            <div class="video-embed">
-              <iframe
-                src="https://www.youtube-nocookie.com/embed/ALbZ9YaurHw"
-                title="Studio Legends — Techlog: Building & Terrain Systems"
-                loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allowfullscreen></iframe>
-            </div>
-            <div class="video-meta">
-              <span class="tag tag-new">Recent personal project</span>
-              <h3>Studio Legends — Techlog: Building &amp; Terrain Systems</h3>
-              <p>A behind-the-scenes look at the building and terrain systems I'm developing for Studio Legends, my solo game project. Real-time systems work in Unity, from the ground up.</p>
-            </div>
-          </article>
-
-          <article class="video-card">
-            <div class="video-embed">
-              <iframe
-                src="https://www.youtube-nocookie.com/embed/4gKCksgTrr0"
-                title="Jake Fletcher 2026 Reel"
-                loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allowfullscreen></iframe>
-            </div>
-            <div class="video-meta">
-              <span class="tag">Demo Reel</span>
-              <h3>Jake Fletcher — 2026 Reel</h3>
-              <p>My latest demo reel — a highlight of recent gameplay, VR/XR, technical art, and real-time 3D work across production projects.</p>
-            </div>
-          </article>
-
-          <article class="video-card">
-            <div class="video-embed">
-              <iframe
-                src="https://www.youtube-nocookie.com/embed/6GDrKEs-meI"
-                title="Jacob Fletcher - Portfolio 2018 - Revision B"
-                loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                referrerpolicy="strict-origin-when-cross-origin"
-                allowfullscreen></iframe>
-            </div>
-            <div class="video-meta">
-              <span class="tag">Portfolio Reel</span>
-              <h3>Portfolio 2018 — Revision B</h3>
-              <p>An earlier portfolio reel showcasing my technical art, 3D content, animation, and XR prototyping work.</p>
-            </div>
-          </article>
-
-        </div>
-      </div>
-    </section>
+    </div>
   </main>
 
   <!-- ===== Footer ===== -->

@@ -1,44 +1,28 @@
-// Tab switching between Resume and Portfolio panels.
 (function () {
-  const tabs = document.querySelectorAll('.tab');
-  const panels = {
-    resume: document.getElementById('resume'),
-    portfolio: document.getElementById('portfolio'),
-  };
+  // Project videos are thumbnail facades until clicked, so the page loads one
+  // YouTube player (the reel) instead of three.
+  document.querySelectorAll('.lite-yt').forEach((btn) => {
+    // maxresdefault doesn't exist for every upload — fall back to hqdefault.
+    const img = btn.querySelector('img');
+    if (img) {
+      img.addEventListener('error', function onErr() {
+        img.removeEventListener('error', onErr);
+        img.src = 'https://i.ytimg.com/vi/' + btn.dataset.yt + '/hqdefault.jpg';
+      });
+    }
 
-  function activate(name) {
-    if (!panels[name]) return;
-
-    // Panels
-    Object.entries(panels).forEach(([key, el]) => {
-      const on = key === name;
-      el.classList.toggle('is-active', on);
-      el.hidden = !on;
-    });
-
-    // Tab buttons
-    tabs.forEach((t) => {
-      const on = t.dataset.tab === name;
-      t.classList.toggle('is-active', on);
-      t.setAttribute('aria-selected', on ? 'true' : 'false');
-    });
-
-    // Reflect in URL hash without jumping
-    history.replaceState(null, '', '#' + name);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // Any element with [data-tab] switches tabs (nav buttons, hero CTAs, brand).
-  document.querySelectorAll('[data-tab]').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      activate(el.dataset.tab);
+    btn.addEventListener('click', () => {
+      const frame = document.createElement('iframe');
+      frame.src =
+        'https://www.youtube-nocookie.com/embed/' + btn.dataset.yt + '?autoplay=1&rel=0';
+      frame.title = btn.dataset.ytTitle || 'Video';
+      frame.allow =
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      frame.allowFullscreen = true;
+      btn.replaceWith(frame);
     });
   });
-
-  // Deep-link support: #portfolio opens that tab on load.
-  const initial = (location.hash || '').replace('#', '');
-  if (initial === 'portfolio' || initial === 'resume') activate(initial);
 
   // Footer year
   const yearEl = document.getElementById('year');
