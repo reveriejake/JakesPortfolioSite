@@ -187,7 +187,7 @@
         "desc": "A statement-of-work builder. Fill in parties, rate, and deliverables and it renders a formatted SOW live beside the form, totalling hours and cost as you type. Drafts with AI, and exports to PDF, Markdown, or JSON.",
         "date": "2026",
         "tags": [{ "label": "AI-assisted", "variant": "ai" }],
-        "media": { "type": "image", "src": "assets/sow-generator.jpg", "alt": "SOW Builder — a deliverables form on the left rendering a live statement of work preview on the right", "portrait": false },
+        "media": { "type": "image", "src": "assets/sow-generator.png", "alt": "SOW Builder — a deliverables form on the left rendering a live statement of work preview on the right", "portrait": false },
         "actions": []
       },
       {
