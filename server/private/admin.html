@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Site Admin — Jacob Fletcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/admin/app.css" />
+</head>
+<body class="admin">
+
+  <div class="admin-shell is-live" id="shell">
+
+    <header class="topbar">
+      <div class="topbar-brand">
+        <strong>Site Admin</strong>
+        <span id="who">…</span>
+      </div>
+      <div class="topbar-actions">
+        <span class="status-chip" id="status">loading…</span>
+        <button class="btn btn-ghost btn-sm" id="btn-preview" type="button">Preview</button>
+        <button class="btn btn-ghost btn-sm" id="btn-revert" type="button">Discard</button>
+        <button class="btn btn-primary btn-sm" id="btn-save" type="button">Save &amp; publish</button>
+        <button class="btn btn-ghost btn-sm" id="btn-logout" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <div class="admin-body">
+      <nav class="rail" id="rail" aria-label="Admin sections"></nav>
+      <main class="panel" id="panel"></main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/admin/app.js"></script>
+</body>
+</html>

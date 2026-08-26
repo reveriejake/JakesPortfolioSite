@@ -1,115 +1,146 @@
 # Jacob Fletcher — Portfolio Site
 
-A single-page portfolio/résumé site. No build step, no dependencies — just static files.
+A single-page portfolio/résumé site with a small CMS and first-party analytics
+behind it. Node + Express + SQLite; no external services, no monthly cost.
 
 ## Structure
 ```
-index.html      One page: Demo Reel → About Me → Work History → Projects → References
-content.json    Every editable string on the page — the source of truth
-styles.css      Styling (responsive; palette + motifs documented at the top of the file)
-script.js       Renders index.html from content.json; video facades; footer year
-analytics.js    First-party event log (localStorage, optional POST endpoint)
-admin.html      Admin console — edit content, read analytics
-admin.css       Admin styling (layered on styles.css, so it shares the tokens)
-admin.js        Admin behaviour
-assets/
-  headshot.png                  Profile photo
-  procedural-landscape.png      Hero backdrop
-  ace.jpg  bookjake.jpg  aupex.jpg  sow-generator.jpg
-  balencil.jpg  overlap.jpg  sol-defender.jpg
-  dollar-origami.png  balloon-animals.jpg  ansel-and-clair.webp
-  project-stardust.png  editor-tool.jpg (2DVLS)  quickropes.jpg
-                                One hero image per project, in list order
-  terrain-tech.jpg              Unused — awaiting a project to belong to
-  Jacob_Fletcher_Resume.pdf     Downloadable résumé
-Reference/      Original source files (not used by the site)
+public/                     Everything the world can fetch — and nothing else
+  index.html                One page: Demo Reel → About → Work History → Projects → References
+  styles.css                Styling (palette + motifs documented at the top of the file)
+  script.js                 Renders the page from the content API; video facades
+  analytics.js              Sends events to /api/events
+  assets/                   Images, and Jacob_Fletcher_Resume.pdf
+
+server/
+  server.js                 Routes: static site, content API, analytics, auth, admin
+  lib/db.js                 SQLite schema + queries
+  lib/auth.js               scrypt passwords, server-side sessions
+  lib/stats.js              Analytics aggregation (SQL)
+  bin/create-user.js        Create an admin user / reset a password
+  bin/seed-content.js       Import content.json into the database
+  private/                  Admin console — never served without a session
+    admin.html  admin.css  admin.js  login.html
+
+deploy/
+  portfolio.service         systemd unit
+  nginx.conf                Reverse proxy + TLS
+
+content.json                Seed content. Not served; the database is the live copy.
+data/site.db                SQLite (created on first run; gitignored)
+Reference/                  Original source files (gitignored, never published)
 ```
 
-## Page order
-1. **Demo Reel** (`#reel`) — the 2026 reel embedded front and center, with a VR/ACE/Microsoft credential strip.
-2. **About Me** (`#about`) — headshot, bio, contact links.
-3. **Work History** (`#experience`) — professional timeline.
-4. **Projects** (`#projects`) — a vertical list; each entry is one hero image plus name,
-   description, date, and an optional CTA.
-5. References (`#references`) — supporting section at the end.
+**`public/` is the static root, and that is load-bearing.** Anything placed there is
+world-readable. The server, the database, and `Reference/` sit outside it on purpose —
+a static root above your source directory will serve your source.
+
+## Running it
+
+```bash
+cd server
+npm install
+npm run create-user -- you@example.com    # prompts for a password
+npm run seed                              # optional: content.json → database
+npm start                                 # http://127.0.0.1:3000
+```
+
+Environment variables (all optional): `PORT`, `HOST`, `SITE_ROOT`, `DATA_DIR`,
+`SEED_FILE`, `EVENT_RETENTION_DAYS`, `TRUST_PROXY_HOPS`, `NODE_ENV`.
+
+## Deploying to EC2
+
+```bash
+sudo mkdir -p /var/www/portfolio /var/lib/portfolio
+sudo rsync -a --exclude Reference --exclude data ./ /var/www/portfolio/
+sudo chown -R www-data:www-data /var/www/portfolio /var/lib/portfolio
+
+cd /var/www/portfolio/server && sudo -u www-data npm ci --omit=dev
+sudo -u www-data npm run create-user -- you@example.com
+
+sudo cp /var/www/portfolio/deploy/portfolio.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now portfolio
+
+sudo cp /var/www/portfolio/deploy/nginx.conf /etc/nginx/sites-available/portfolio
+sudo ln -s /etc/nginx/sites-available/portfolio /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d example.com -d www.example.com
+```
+
+Security group: allow 80 and 443 only. The Node process binds `127.0.0.1`, so it is
+not reachable from the internet except through nginx.
+
+Logs: `journalctl -u portfolio -f`. Back up `/var/lib/portfolio/site.db` — it holds
+your content history and every analytics event.
+
+**Don't add a `root` + `try_files` block for the site directory in nginx.** Everything
+must go through Node, or nginx will happily serve files the app means to protect.
+
+## Admin console
+
+`https://your-domain/admin` — email and password, checked on the server. A session
+cookie (HttpOnly, Secure, SameSite=Lax) is stored server-side and can be revoked.
+
+Without a session, `/admin` shows the sign-in page and the console's own JS and CSS
+return **404**, not 401 — an anonymous visitor gets exactly what they'd get for any
+path that doesn't exist. Failed logins are throttled to 8 per IP per 15 minutes.
+
+**Content tabs** — Home/Reel, About, Work history, Projects, References, Site & footer.
+Lists reorder with ↑ ↓ and delete with ✕. Edits are kept as a local draft until you
+press **Save & publish**, which writes to the database; the change is live on the next
+page load, with no redeploy. Every save is a version, and **Settings → Version history**
+restores any of them (a restore is itself a new version, so it's undoable too).
+
+**Analytics tab** — page views per day, unique visitors, sessions, average time on page,
+how many sessions read past the reel, résumé downloads, video plays, project clicks,
+outbound clicks, referrers, devices, and a raw event table. CSV export for any range.
+
+## Analytics, and what it does not collect
+
+Events are recorded server-side from every visitor. No third-party scripts, no cookies,
+and nothing stored on the visitor's device — so there is nothing to put a consent banner
+in front of.
+
+- A visitor is counted as `sha256(daily_salt + IP + user-agent)`, truncated. The salt
+  rotates every UTC day, so the hashes cannot be chained across days into a profile,
+  and the raw IP is never written down.
+- A per-tab session id lives in `sessionStorage` and dies with the tab. It only groups
+  one visit's events together.
+- `Do Not Track` is honoured — those visitors send nothing.
+- Obvious bots are dropped by user-agent, and your own visits aren't counted while
+  you're signed in to the admin in that browser.
+- Events are kept 400 days (`EVENT_RETENTION_DAYS`), then pruned automatically.
+
+## Content notes
+- The database is the live copy. `content.json` in the repo is the seed used on first
+  boot and the fallback if the table is ever empty — edit content in the admin, not
+  in the file.
+- Rich fields (`lead`, `desc`, bullets, bio paragraphs) accept `<strong>`, `<em>`,
+  `<a>`, `<br>`, `<span>`, `<code>`. Everything else is stripped when the page renders.
+- To swap the featured reel, change the YouTube ID on the Home/Reel tab.
+- A project has a `media` hero — either an image in `public/assets/` or a YouTube
+  facade. Portrait captures set "letterbox instead of crop".
+- Tag variants: `ai` marks AI-assisted work, `vr` the VR/XR pill, `new` the accent chip.
+- Video heroes are **facades**: a thumbnail plus a play button that swaps itself for a
+  real iframe on click. Only the hero reel loads a player up front.
+- Roles worth spotlighting set "highlight this role", which draws the gradient rail.
+- There is no site nav — the page reads top to bottom.
+- Reference emails/phones are intentionally left off the public page and the résumé.
 
 ## Visual system
 The palette is sampled from Jake's own renders in `Reference/` — the cyan → lavender →
 magenta → violet ramp of `ProceduralLandscape_01`, over the near-black indigo of
-`ArtisticViewOfEditorTool`. Tokens live in `:root` at the top of `styles.css`.
+`ArtisticViewOfEditorTool`. Tokens live in `:root` at the top of `public/styles.css`,
+and the admin inherits them rather than redeclaring them.
 
 Recurring motifs, so new sections stay consistent:
 - **Soft rectangles** — cards, buttons, and images share two radii (`--radius` /
   `--radius-sm`); no cut corners, no corner brackets.
-- **Gradient rails and edges** — accents are drawn as thin gradient lines rather than
-  ornament: a cyan→violet rail down the left of each job card, a spectrum hairline
-  across the top of the reel frame, a gradient ring behind the headshot.
+- **Gradient rails and edges** — accents are thin gradient lines rather than ornament:
+  a cyan→violet rail down the left of each job card, a spectrum hairline across the top
+  of the reel frame, a gradient ring behind the headshot.
 - **Mono labels** — JetBrains Mono for eyebrows, tags, dates, buttons, and captions;
   Space Grotesk for headings; Inter for body copy.
 - **Numbered headers** — `<h2 class="block-title" data-index="0N">`; the number and
   trailing rule are drawn by CSS.
 - **Editor grid** — a faint violet grid overlays the page and fades out below the fold.
-
-## Run locally
-Open `index.html` directly, or serve it (recommended, so the YouTube embeds behave):
-
-```bash
-# Python
-python -m http.server 8000
-# then visit http://localhost:8000
-```
-
-## Deploy
-Any static host works — drag the folder onto **Netlify**, push to **GitHub Pages**,
-or upload to **Cloudflare Pages** / S3. No configuration required.
-
-## Admin console
-
-Serve the folder and open **`http://localhost:8000/admin.html`**. It asks for a passcode
-the first time and stores a hash of it in that browser. This is a latch, not security —
-the files sit on a public static host either way. If that matters, leave `admin.html`,
-`admin.css`, and `admin.js` out of what you deploy; the site does not need them.
-
-**Content tabs** edit `content.json` — headline and reel, bio, work history, projects,
-references, page metadata and footer. Lists reorder with ↑ ↓ and delete with ✕. Changes
-are kept as a draft in the browser, so a closed tab loses nothing, and the chip in the
-top bar says whether the draft still matches `content.json`.
-
-There is no server to save to, so publishing is a file move:
-
-1. **Preview** opens the site in a new tab rendered from your draft.
-2. **Download content.json** (or **Copy JSON**) gives you the new file.
-3. Drop it next to `index.html` and deploy.
-
-**Analytics tab** reads what `analytics.js` records: page views per day, unique visitors
-and sessions, average time on page, résumé downloads, video plays, project clicks,
-outbound clicks, sections actually scrolled into view, referrers, and devices — plus a
-raw event table and a CSV export.
-
-By default those events live in `localStorage` **on each visitor's own device**, so the
-dashboard shows the browser you open it in and nothing else. A static host has no way to
-pool them. To count every visitor, set a **collection endpoint** in Settings: each event
-is then POSTed there as JSON, and the tab reads totals back from a GET. Visitors with Do
-Not Track on are never recorded, and Settings has a switch to keep your own visits out.
-
-## Content notes
-- Copy lives in `content.json`. `script.js` renders the page from it on load; the markup
-  in `index.html` is the fallback that shows when the file is missing or the page is
-  opened over `file://`. Edit the JSON (or use the admin), not both — if you do change
-  `index.html` by hand, mirror it in `content.json` or the JSON will win.
-- Rich fields (`lead`, `desc`, bullets, bio paragraphs) accept `<strong>`, `<em>`, `<a>`,
-  `<br>`, `<span>`, `<code>`. Everything else is stripped when the page renders.
-- To swap the featured reel, change `reel.youtubeId`.
-- To add a project, add an object to `projects.items`: `name`, `desc`, `date`, `tags`, a
-  `media` hero (`type: "image"` with `src`/`alt`, or `type: "video"` with `youtubeId`),
-  and an optional `actions` CTA row.
-- `tags: [{label, variant}]` — `variant: "ai"` marks AI-assisted work, `"vr"` the VR/XR
-  pill, `"new"` the accent chip; `""` is the plain chip.
-- Portrait captures (phone screenshots) set `media.portrait: true`, which letterboxes
-  instead of cropping the frame to a ribbon.
-- Video heroes are **facades**: a thumbnail plus a play button that swaps itself for a
-  real iframe on click. Only the hero reel embeds a live player on page load, which keeps
-  YouTube's console noise and payload down.
-- Roles worth spotlighting set `"key": true` on the job, which draws the gradient rail.
-- There is no site nav — the page reads top to bottom.
-- Reference emails/phones were intentionally left off the public page.

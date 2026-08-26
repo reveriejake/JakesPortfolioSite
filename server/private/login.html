@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Sign in</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #08061a; --surface: #141033; --border: #2e2560; --border-lit: #4a3a9e;
+      --text: #eee9ff; --text-dim: #a79ccb; --text-mute: #7264a0;
+      --magenta: #e34ff0; --violet: #7b3cff; --cyan: #4fd6e8; --bad: #ff6b8a;
+      --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      display: grid; place-items: center; padding: 24px;
+      background: radial-gradient(120% 90% at 50% 0%, #17103d 0%, var(--bg) 62%);
+      color: var(--text);
+      font-family: "Inter", system-ui, sans-serif; line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    .card {
+      width: min(400px, 100%);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 32px 28px;
+      box-shadow: 0 18px 50px rgba(4, 2, 16, .7);
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ""; position: absolute; inset: 0 0 auto 0; height: 2px;
+      background: linear-gradient(120deg, var(--cyan), #b58cff, var(--magenta));
+    }
+    .eyebrow {
+      font-family: var(--mono); font-size: .68rem; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--cyan); margin: 0 0 8px;
+    }
+    h1 { font-family: "Space Grotesk", sans-serif; font-size: 1.4rem; margin: 0 0 22px; }
+    label {
+      display: block; margin-bottom: 6px;
+      font-family: var(--mono); font-size: .7rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--text-mute);
+    }
+    input {
+      width: 100%; padding: 11px 12px; margin-bottom: 16px;
+      background: #0d0a24; border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text); font: inherit; font-size: .95rem;
+    }
+    input:focus {
+      outline: none; border-color: var(--border-lit);
+      box-shadow: 0 0 0 3px rgba(122, 60, 255, .18);
+    }
+    button {
+      width: 100%; padding: 12px 16px; border: 0; border-radius: 8px;
+      background: linear-gradient(120deg, var(--magenta), var(--violet));
+      color: #fff; font-family: var(--mono); font-size: .78rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+    }
+    button:disabled { opacity: .55; cursor: default; }
+    .err {
+      min-height: 1.3em; margin: 0 0 12px;
+      font-family: var(--mono); font-size: .76rem; color: var(--bad);
+    }
+    .note { margin: 20px 0 0; font-size: .78rem; color: var(--text-mute); }
+    .note a { color: var(--magenta); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <form class="card" id="form" autocomplete="on">
+    <p class="eyebrow">Site Admin</p>
+    <h1>Sign in</h1>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" autocomplete="username" required autofocus />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" autocomplete="current-password" required />
+
+    <p class="err" id="err" role="alert"></p>
+    <button type="submit" id="go">Sign in</button>
+
+    <p class="note"><a href="/">← Back to the site</a></p>
+  </form>
+
+  <script>
+    const form = document.getElementById('form');
+    const err = document.getElementById('err');
+    const go = document.getElementById('go');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      err.textContent = '';
+      go.disabled = true;
+      go.textContent = 'Checking…';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+          })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Sign-in failed.');
+        location.href = '/admin';
+      } catch (e2) {
+        err.textContent = e2.message;
+        go.disabled = false;
+        go.textContent = 'Sign in';
+        document.getElementById('password').select();
+      }
+    });
+  </script>
+</body>
+</html>

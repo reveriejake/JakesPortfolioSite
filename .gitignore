@@ -10,3 +10,11 @@ Thumbs.db
 .DS_Store
 desktop.ini
 *~
+
+# Server runtime
+node_modules/
+data/
+*.db
+*.db-wal
+*.db-shm
+.env

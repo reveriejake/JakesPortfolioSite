@@ -1,31 +1,33 @@
 /* =================================================================
    Admin console.
 
-   Content model  — content.json is the source of truth. This edits a
-                    working copy, keeps it in localStorage as a draft,
-                    and hands you back a content.json to commit. There
-                    is no server to save to; a static host has nowhere
-                    to write.
-   Analytics      — reads the event log analytics.js writes, either
-                    from this browser's localStorage or from a
-                    collection endpoint you set in Settings.
+   Content  — the server owns it. This loads the current version from
+              /api/content, edits a working copy (kept in localStorage
+              so a closed tab loses nothing), and PUTs it back on Save.
+              Every save is a new version, so a bad edit is one click
+              from undone.
+   Analytics — /api/stats returns finished aggregates computed in SQL
+              across every visitor. Nothing is counted in the browser.
+   Auth     — the session cookie set at sign-in. This file is only
+              served to a signed-in request in the first place.
    ================================================================= */
 (function () {
   'use strict';
 
   var DRAFT_KEY   = 'jf.admin.draft';
-  var PASS_KEY    = 'jf.admin.pass';
   var TAB_KEY     = 'jf.admin.tab';
   var PREVIEW_KEY = 'jf.admin.preview';
 
-  var A = window.JFAnalytics;
-
   var state = {
     content: null,     // working copy
-    published: null,   // content.json as loaded
+    published: null,   // last version the server confirmed
+    version: null,     // its id
+    user: null,
     tab: 'reel',
     range: 30,         // analytics window, days (0 = all)
-    source: 'local'
+    stats: null,
+    statsError: null,
+    versions: []
   };
 
   var openItems = new WeakSet(); // which repeater rows are expanded
@@ -74,15 +76,6 @@
     toastTimer = setTimeout(function () { t.classList.remove('is-up'); }, 2200);
   }
 
-  function download(filename, text, mime) {
-    var blob = new Blob([text], { type: mime || 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = el('a', { href: url, download: filename });
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-  }
 
   function nf(n) { return Number(n || 0).toLocaleString(); }
 
@@ -100,83 +93,36 @@
     return Math.floor(sec / 60) + 'm ' + String(sec % 60).padStart(2, '0') + 's';
   }
 
-  function dayKey(ts) {
-    var d = new Date(ts);
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' +
-           String(d.getDate()).padStart(2, '0');
-  }
 
   /* =============================================================
-     2. Passcode gate
+     2. Server calls
      ============================================================= */
 
-  function hashPass(text) {
-    // WebCrypto needs a secure context; file:// doesn't get one. The
-    // fallback is a checksum, not a hash — which is fine, because this
-    // latch was never the thing keeping anyone out (see gate note).
-    if (window.crypto && window.crypto.subtle && window.isSecureContext) {
-      return window.crypto.subtle
-        .digest('SHA-256', new TextEncoder().encode('jf.admin$' + text))
-        .then(function (buf) {
-          return 'sha256:' + Array.prototype.map
-            .call(new Uint8Array(buf), function (b) { return b.toString(16).padStart(2, '0'); })
-            .join('');
-        });
+  function api(path, options) {
+    var opts = options || {};
+    opts.headers = opts.headers || {};
+    opts.headers.Accept = 'application/json';
+    if (opts.body && typeof opts.body !== 'string') {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.body = JSON.stringify(opts.body);
     }
-    var h = 5381;
-    for (var i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
-    return Promise.resolve('weak:' + (h >>> 0).toString(36));
-  }
+    opts.credentials = 'same-origin';
 
-  function initGate(onUnlock) {
-    var gate    = document.getElementById('gate');
-    var input   = document.getElementById('gate-input');
-    var confirm = document.getElementById('gate-confirm');
-    var confirmField = document.getElementById('gate-confirm-field');
-    var err     = document.getElementById('gate-err');
-    var go      = document.getElementById('gate-go');
-    var title   = document.getElementById('gate-title');
-
-    var stored = null;
-    try { stored = localStorage.getItem(PASS_KEY); } catch (e) { /* storage off */ }
-    var isSetup = !stored;
-
-    if (isSetup) {
-      title.textContent = 'Set a passcode';
-      confirmField.hidden = false;
-      go.textContent = 'Set passcode & open';
-      input.autocomplete = 'new-password';
-    }
-
-    function fail(msg) { err.textContent = msg; input.focus(); }
-
-    function submit() {
-      var value = input.value;
-      if (!value) return fail('Enter a passcode.');
-
-      if (isSetup) {
-        if (value.length < 4) return fail('Use at least 4 characters.');
-        if (value !== confirm.value) return fail('The two entries don’t match.');
-        hashPass(value).then(function (h) {
-          try { localStorage.setItem(PASS_KEY, h); } catch (e) { /* ignore */ }
-          gate.hidden = true;
-          onUnlock();
-        });
-        return;
+    return fetch(path, opts).then(function (res) {
+      // The session expiring mid-edit shouldn't look like a random failure.
+      if (res.status === 401) {
+        location.href = '/admin';
+        throw new Error('Session expired');
       }
-
-      hashPass(value).then(function (h) {
-        if (h !== stored) return fail('Wrong passcode.');
-        gate.hidden = true;
-        onUnlock();
+      if (res.status === 204) return null;
+      return res.json().then(function (body) {
+        if (!res.ok) throw new Error(body && body.error ? body.error : 'HTTP ' + res.status);
+        return body;
+      }, function () {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return null;
       });
-    }
-
-    go.addEventListener('click', submit);
-    [input, confirm].forEach(function (node) {
-      node.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
     });
-    input.focus();
   }
 
   /* =============================================================
@@ -202,7 +148,9 @@
   function paintStatus() {
     var chip = document.getElementById('status');
     var dirty = isDirty();
-    chip.textContent = dirty ? 'unpublished changes' : 'matches content.json';
+    chip.textContent = dirty
+      ? 'unsaved changes'
+      : (state.version ? 'published · v' + state.version : 'published');
     chip.className = 'status-chip ' + (dirty ? 'is-dirty' : 'is-clean');
   }
 
@@ -735,43 +683,12 @@
      6. Analytics
      ============================================================= */
 
-  function rangeStart() {
-    if (!state.range) return 0;
-    return Date.now() - state.range * 86400000;
-  }
-
-  function loadEvents() {
-    if (state.source === 'remote') {
-      var url = A.getEndpoint();
-      if (!url) return Promise.resolve({ events: [], error: 'No endpoint configured.' });
-      return fetch(url, { headers: { Accept: 'application/json' } })
-        .then(function (res) { return res.ok ? res.json() : Promise.reject(new Error('HTTP ' + res.status)); })
-        .then(function (data) {
-          var events = Array.isArray(data) ? data : (data && data.events) || [];
-          return { events: events };
-        })
-        .catch(function (err) { return { events: [], error: String(err.message || err) }; });
-    }
-    return Promise.resolve({ events: A.events() });
-  }
-
-  function tally(events, keyFn) {
-    var map = Object.create(null);
-    events.forEach(function (e) {
-      var k = keyFn(e);
-      if (!k) return;
-      map[k] = (map[k] || 0) + 1;
-    });
-    return Object.keys(map)
-      .map(function (k) { return { label: k, value: map[k] }; })
-      .sort(function (a, b) { return b.value - a.value; });
-  }
-
-  function uniqueCount(events, prop) {
-    var seen = Object.create(null);
-    var n = 0;
-    events.forEach(function (e) { if (e[prop] && !seen[e[prop]]) { seen[e[prop]] = 1; n++; } });
-    return n;
+  function loadStats() {
+    var days = state.range;
+    var tz = new Date().getTimezoneOffset();
+    return api('/api/stats?days=' + days + '&tz=' + tz)
+      .then(function (data) { state.stats = data; state.statsError = null; })
+      .catch(function (err) { state.stats = null; state.statsError = String(err.message || err); });
   }
 
   /**
@@ -810,7 +727,6 @@
     var svg = ['<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h +
                '" role="img" aria-label="' + escapeHtml(opts.aria || 'Column chart') + '">'];
 
-    // gridlines + y ticks
     [0, 0.5, 1].forEach(function (frac) {
       var val = top * frac;
       var y = padT + plotH - plotH * frac;
@@ -833,7 +749,7 @@
         ' L' + (x + barW) + ' ' + (padT + plotH) + ' Z';
 
       svg.push('<g><title>' + escapeHtml(p.full || p.label) + ' — ' + nf(p.value) + ' ' +
-               escapeHtml(opts.unit || 'views') + '</title>');
+               escapeHtml(opts.unit || 'views') + (p.extra ? ', ' + escapeHtml(p.extra) : '') + '</title>');
       if (d) svg.push('<path class="chart-bar" d="' + d + '" />');
       svg.push('<rect class="chart-hit" x="' + (padL + i * band) + '" y="' + padT +
                '" width="' + band + '" height="' + plotH + '" /></g>');
@@ -847,7 +763,6 @@
                '" text-anchor="middle">' + nf(max) + '</text>');
     }
 
-    // x labels, thinned so they never collide
     var every = Math.max(1, Math.ceil(n / Math.floor(plotW / 58)));
     svg.push('<g class="chart-axis">');
     points.forEach(function (p, i) {
@@ -862,7 +777,7 @@
 
   function barList(rows, opts) {
     opts = opts || {};
-    if (!rows.length) {
+    if (!rows || !rows.length) {
       return el('p', { class: 'hint', text: opts.emptyText || 'No data in this range yet.' });
     }
     var max = rows[0].value || 1;
@@ -895,25 +810,6 @@
     ]);
   }
 
-  function analyticsFilters(onChange) {
-    return el('div', { class: 'filter-row' }, [
-      selectRowPlain(state.range, [
-        { value: 7, label: 'Last 7 days' },
-        { value: 30, label: 'Last 30 days' },
-        { value: 90, label: 'Last 90 days' },
-        { value: 0, label: 'All time' }
-      ], function (v) { state.range = Number(v); onChange(); }),
-      selectRowPlain(state.source, [
-        { value: 'local', label: 'This browser' },
-        { value: 'remote', label: 'Collection endpoint' }
-      ], function (v) { state.source = v; onChange(); }),
-      el('span', { class: 'spacer' }),
-      el('button', { class: 'btn btn-ghost btn-sm', type: 'button', text: 'Export CSV',
-                     onclick: exportCsv }),
-      el('button', { class: 'btn btn-ghost btn-sm', type: 'button', text: 'Refresh', onclick: onChange })
-    ]);
-  }
-
   function selectRowPlain(value, options, onChange) {
     var sel = el('select', {}, options.map(function (o) {
       var opt = el('option', { value: o.value, text: o.label });
@@ -924,142 +820,117 @@
     return sel;
   }
 
-  function exportCsv() {
-    loadEvents().then(function (res) {
-      var cols = ['t', 'iso', 'type', 'label', 'path', 'ref', 'dev', 'vid', 'sid', 'sec', 'href'];
-      var lines = [cols.join(',')];
-      res.events.forEach(function (e) {
-        lines.push(cols.map(function (c) {
-          var v = c === 'iso' ? new Date(e.t).toISOString() : e[c];
-          if (v == null) return '';
-          v = String(v);
-          return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
-        }).join(','));
-      });
-      download('analytics-' + dayKey(Date.now()) + '.csv', lines.join('\n'), 'text/csv');
-      toast('CSV exported');
+  function seriesPoints(series) {
+    var short = series.length <= 14;
+    return series.map(function (row) {
+      var d = new Date(row.day + 'T12:00:00');
+      return {
+        label: short || d.getDate() === 1
+          ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+          : String(d.getDate()),
+        full: d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
+        value: row.views,
+        extra: row.visitors + ' unique'
+      };
     });
   }
 
   function tabAnalytics() {
     var mount = el('div');
-    var head = panelHead('Analytics', 'Collected first-party by analytics.js — no third-party scripts, no cookies. Visitors with Do Not Track on are not counted.');
 
     function draw() {
-      loadEvents().then(function (res) {
+      clear(mount);
+      mount.appendChild(el('p', { class: 'hint', text: 'Loading…' }));
+
+      loadStats().then(function () {
         clear(mount);
-        mount.appendChild(analyticsFilters(draw));
 
-        if (res.error) {
+        mount.appendChild(el('div', { class: 'filter-row' }, [
+          selectRowPlain(state.range, [
+            { value: 7, label: 'Last 7 days' },
+            { value: 30, label: 'Last 30 days' },
+            { value: 90, label: 'Last 90 days' },
+            { value: 365, label: 'Last 12 months' },
+            { value: 0, label: 'All time' }
+          ], function (v) { state.range = Number(v); draw(); }),
+          el('span', { class: 'spacer' }),
+          el('a', {
+            class: 'btn btn-ghost btn-sm',
+            href: '/api/stats/export.csv?days=' + state.range,
+            text: 'Export CSV'
+          }),
+          el('button', { class: 'btn btn-ghost btn-sm', type: 'button', text: 'Refresh', onclick: draw })
+        ]));
+
+        if (state.statsError) {
           mount.appendChild(el('div', { class: 'callout is-warn', html:
-            '<strong>Couldn’t read the endpoint.</strong> ' + escapeHtml(res.error) +
-            ' — set a working URL in Settings, or switch the source back to “This browser”.' }));
+            '<strong>Couldn’t load stats.</strong> ' + escapeHtml(state.statsError) }));
+          return;
         }
 
-        if (state.source === 'local') {
-          mount.appendChild(el('div', { class: 'callout', html:
-            '<strong>These are this browser’s numbers.</strong> Events live in localStorage on each ' +
-            'visitor’s own device, so a static host has no way to pool them. To see every visitor, ' +
-            'point Settings → collection endpoint at a URL that accepts a JSON POST per event and ' +
-            'returns the log on GET.' }));
-        }
+        var s = state.stats;
+        var t = s.totals;
 
-        var from = rangeStart();
-        var events = res.events.filter(function (e) { return e.t >= from; });
-
-        if (!events.length) {
+        if (!t.pageviews && !t.sessions) {
           mount.appendChild(el('div', { class: 'empty-state' }, [
-            el('strong', { text: 'No events in this range' }),
-            el('p', { text: state.source === 'remote'
-              ? 'The endpoint returned nothing for this window.'
-              : 'Open index.html in this browser and click around — pageviews, section reads, project clicks, video plays and résumé downloads will show up here.' })
+            el('strong', { text: 'No traffic recorded in this range' }),
+            el('p', { text: 'Events are collected server-side from every visitor. If the site is live and this stays empty, check that analytics.js is loading and that /api/events returns 204.' })
           ]));
           return;
         }
 
-        var views    = events.filter(function (e) { return e.type === 'pageview'; });
-        var ends     = events.filter(function (e) { return e.type === 'session_end' && e.sec; });
-        var resumes  = events.filter(function (e) { return e.type === 'resume_download'; });
-        var plays    = events.filter(function (e) { return e.type === 'video_play'; });
-        var projects = events.filter(function (e) { return e.type === 'project_click'; });
-        var outbound = events.filter(function (e) { return e.type === 'outbound_click'; });
-        var sections = events.filter(function (e) { return e.type === 'section_view'; });
-
-        var avgSec = ends.length
-          ? ends.reduce(function (s, e) { return s + e.sec; }, 0) / ends.length
-          : 0;
-
         // hero — exactly one per view
         mount.appendChild(el('div', { class: 'hero-stat' }, [
           el('div', { class: 'stat-label', text: 'Page views' }),
-          el('div', { class: 'stat-value', text: nf(views.length) }),
+          el('div', { class: 'stat-value', text: nf(t.pageviews) }),
           el('p', { class: 'stat-sub', text:
-            nf(uniqueCount(events, 'vid')) + ' visitors · ' + nf(uniqueCount(events, 'sid')) +
-            ' sessions · ' + (state.range ? 'last ' + state.range + ' days' : 'all time') })
+            nf(t.visitors) + ' visitors · ' + nf(t.sessions) + ' sessions · ' +
+            (state.range ? 'last ' + state.range + ' days' : 'all time') })
         ]));
 
         mount.appendChild(el('div', { class: 'stat-grid' }, [
-          statTile('Avg. time on page', duration(avgSec), ends.length + ' measured'),
-          statTile('Résumé downloads', compact(resumes.length), 'PDF link clicks'),
-          statTile('Video plays', compact(plays.length), 'reel + project facades'),
-          statTile('Project clicks', compact(projects.length), 'CTAs inside project cards'),
-          statTile('Outbound clicks', compact(outbound.length), 'links off the site')
+          statTile('Avg. time on page', duration(t.avgSeconds), nf(t.dwellSamples) + ' measured'),
+          statTile('Read past the reel', (100 - t.bounceRate) + '%', 'sessions that scrolled or clicked'),
+          statTile('Résumé downloads', compact(t.resumeDownloads), 'PDF link clicks'),
+          statTile('Video plays', compact(t.videoPlays), 'reel + project facades'),
+          statTile('Project clicks', compact(t.projectClicks), 'CTAs inside project cards'),
+          statTile('Outbound clicks', compact(t.outboundClicks), 'links off the site')
         ]));
 
-        // views per day
-        var days = [];
-        var span = state.range || Math.max(1, Math.ceil((Date.now() - events[0].t) / 86400000) + 1);
-        span = Math.min(span, 120);
-        var counts = Object.create(null);
-        views.forEach(function (e) { var k = dayKey(e.t); counts[k] = (counts[k] || 0) + 1; });
-        for (var i = span - 1; i >= 0; i--) {
-          var d = new Date(Date.now() - i * 86400000);
-          var k = dayKey(d.getTime());
-          days.push({
-            label: d.getDate() === 1 || span <= 14
-              ? d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-              : String(d.getDate()),
-            full: d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
-            value: counts[k] || 0
-          });
-        }
-        mount.appendChild(chartCard('Page views per day', 'Hover a column for the exact count.',
-          el('div', { class: 'chart-scroll', html: columnChart(days, { aria: 'Page views per day' }) })));
+        mount.appendChild(chartCard('Page views per day', 'Hover a column for the exact count and unique visitors.',
+          el('div', { class: 'chart-scroll', html: columnChart(seriesPoints(s.series), { aria: 'Page views per day' }) })));
 
         mount.appendChild(el('div', { class: 'two-col' }, [
-          chartCard('Projects clicked', 'By project name.',
-            barList(tally(projects, function (e) { return e.label; }))),
-          chartCard('Sections read', 'Scrolled at least 40% into view.',
-            barList(tally(sections, function (e) { return e.label; })))
+          chartCard('Projects clicked', 'By project name.', barList(s.projects)),
+          chartCard('Sections read', 'Scrolled at least 40% into view.', barList(s.sections))
         ]));
 
         mount.appendChild(el('div', { class: 'two-col' }, [
-          chartCard('Referrers', 'Where visitors arrived from.',
-            barList(tally(views, function (e) { return e.ref; }))),
-          chartCard('Devices', 'Bucketed by viewport width.',
-            barList(tally(views, function (e) { return e.dev; })))
+          chartCard('Referrers', 'Where visitors arrived from.', barList(s.referrers)),
+          chartCard('Devices', 'Bucketed by viewport width.', barList(s.devices))
         ]));
 
-        if (outbound.length) {
-          mount.appendChild(chartCard('Outbound destinations', 'Links that took visitors off the site.',
-            barList(tally(outbound, function (e) { return e.label; }))));
+        if ((s.videos && s.videos.length) || (s.outbound && s.outbound.length)) {
+          mount.appendChild(el('div', { class: 'two-col' }, [
+            chartCard('Videos played', 'Which reel or facade was started.', barList(s.videos)),
+            chartCard('Outbound destinations', 'Links that took visitors off the site.', barList(s.outbound))
+          ]));
         }
 
         // the table view, so nothing is gated behind a chart
-        var recent = events.slice(-40).reverse();
         mount.appendChild(chartCard('Recent events', 'The 40 most recent, newest first.',
           el('div', { class: 'chart-scroll' }, [
             el('table', { class: 'data-table' }, [
-              el('thead', {}, el('tr', {}, ['When', 'Event', 'Detail', 'Device', 'Referrer'].map(function (t) {
-                return el('th', { text: t });
+              el('thead', {}, el('tr', {}, ['When', 'Event', 'Detail', 'Device', 'Referrer'].map(function (h) {
+                return el('th', { text: h });
               }))),
-              el('tbody', {}, recent.map(function (e) {
+              el('tbody', {}, (s.recent || []).map(function (e) {
                 return el('tr', {}, [
-                  el('td', { text: new Date(e.t).toLocaleString() }),
+                  el('td', { text: new Date(e.ts).toLocaleString() }),
                   el('td', { text: e.type }),
-                  el('td', { text: e.label || (e.sec ? e.sec + 's' : '—') }),
-                  el('td', { text: e.dev || '—' }),
-                  el('td', { text: e.ref || '—' })
+                  el('td', { text: e.label || (e.seconds ? e.seconds + 's' : '—') }),
+                  el('td', { text: e.device || '—' }),
+                  el('td', { text: e.referrer || '—' })
                 ]);
               }))
             ])
@@ -1068,18 +939,95 @@
     }
 
     draw();
-    return [head, mount];
+
+    return [
+      panelHead('Analytics', 'Collected server-side from every visitor — no third-party scripts, no cookies, no tracking id stored on anyone’s device. Visitors with Do Not Track on are not counted.'),
+      mount
+    ];
   }
 
   /* =============================================================
      7. Settings
      ============================================================= */
 
-  function tabSettings() {
-    var endpointValue = A.getEndpoint();
-    var optedOut = false;
-    try { optedOut = localStorage.getItem(A.OPTOUT_KEY) === '1'; } catch (e) { /* ignore */ }
+  function versionHistory() {
+    var mount = el('div');
 
+    function draw() {
+      clear(mount);
+      mount.appendChild(el('p', { class: 'hint', text: 'Loading…' }));
+
+      api('/api/content/versions?limit=25').then(function (data) {
+        clear(mount);
+        var rows = (data && data.versions) || [];
+        if (!rows.length) {
+          mount.appendChild(el('p', { class: 'hint', text: 'No saved versions yet.' }));
+          return;
+        }
+        mount.appendChild(el('div', { class: 'chart-scroll' }, [
+          el('table', { class: 'data-table' }, [
+            el('thead', {}, el('tr', {}, ['Version', 'Saved', 'By', 'Note', ''].map(function (h) {
+              return el('th', { text: h });
+            }))),
+            el('tbody', {}, rows.map(function (v, i) {
+              return el('tr', {}, [
+                el('td', { text: '#' + v.id + (i === 0 ? ' (live)' : '') }),
+                el('td', { text: new Date(v.created_at).toLocaleString() }),
+                el('td', { text: v.author || '—' }),
+                el('td', { text: v.note || '—' }),
+                el('td', {}, i === 0 ? null : el('button', {
+                  class: 'btn btn-ghost btn-sm', type: 'button', text: 'Restore',
+                  onclick: function () {
+                    if (!window.confirm('Restore version #' + v.id + '? This saves it as a new version, so the current one stays in history.')) return;
+                    api('/api/content/rollback', { method: 'POST', body: { version: v.id } })
+                      .then(function () { return loadContent(); })
+                      .then(function () { render(); toast('Restored version #' + v.id); })
+                      .catch(function (err) { window.alert('Restore failed: ' + err.message); });
+                  }
+                }))
+              ]);
+            }))
+          ])
+        ]));
+      }).catch(function (err) {
+        clear(mount);
+        mount.appendChild(el('p', { class: 'hint', text: 'Could not load history: ' + err.message }));
+      });
+    }
+
+    draw();
+    return mount;
+  }
+
+  function passwordCard() {
+    var current = el('input', { type: 'password', placeholder: 'Current password', autocomplete: 'current-password' });
+    var next = el('input', { type: 'password', placeholder: 'New password (min 10 characters)', autocomplete: 'new-password' });
+    var style = 'width:100%;padding:10px 12px;background:var(--bg-2);border:1px solid var(--border);' +
+                'border-radius:var(--radius-sm);color:var(--text);font:inherit;margin-bottom:10px';
+    current.style.cssText = style;
+    next.style.cssText = style;
+
+    return el('div', {}, [
+      current,
+      next,
+      el('button', {
+        class: 'btn btn-ghost btn-sm', type: 'button', text: 'Change password',
+        onclick: function () {
+          if (next.value.length < 10) { window.alert('Use at least 10 characters.'); return; }
+          api('/api/auth/password', { method: 'POST', body: { current: current.value, next: next.value } })
+            .then(function () {
+              window.alert('Password changed. You will be signed out on every device.');
+              location.href = '/admin';
+            })
+            .catch(function (err) { window.alert(err.message); });
+        }
+      }),
+      el('p', { class: 'hint', text:
+        'Stored as a scrypt hash on the server. Changing it signs out every device, including this one.' })
+    ]);
+  }
+
+  function tabSettings() {
     var importInput = el('input', { type: 'file', accept: '.json,application/json' });
     importInput.style.display = 'none';
     importInput.addEventListener('change', function () {
@@ -1092,7 +1040,7 @@
           state.content = parsed;
           touch();
           render();
-          toast('Content imported');
+          toast('Imported into the draft — Save & publish to make it live');
         } catch (err) {
           window.alert('Could not import: ' + err.message);
         }
@@ -1101,95 +1049,55 @@
     });
 
     return [
-      panelHead('Settings', 'Passcode, analytics collection, and moving content in and out as JSON.'),
+      panelHead('Settings', 'Version history, your account, and moving content in and out as JSON.'),
 
       card('Publishing', [
         el('div', { class: 'callout', html:
-          '<strong>There is no server to save to.</strong> This site is static files, so ' +
-          '“publish” means: download <code>content.json</code>, drop it in the site folder next to ' +
-          '<code>index.html</code>, and deploy. The page reads it on load; if it is missing, the ' +
-          'markup already in <code>index.html</code> shows instead.' }),
+          '<strong>Save &amp; publish writes to the server.</strong> The change is live on the next page ' +
+          'load — no download, no commit, no redeploy. Every save is kept as a version below, and ' +
+          '<code>content.json</code> in the repo stays as the seed and offline fallback.' }),
         el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, [
-          el('button', { class: 'btn btn-primary btn-sm', type: 'button', text: 'Download content.json',
-                         onclick: publish }),
-          el('button', { class: 'btn btn-ghost btn-sm', type: 'button', text: 'Import content.json',
+          el('button', { class: 'btn btn-primary btn-sm', type: 'button', text: 'Save & publish', onclick: save }),
+          el('a', { class: 'btn btn-ghost btn-sm', href: '/api/content', download: 'content.json',
+                    text: 'Download current JSON' }),
+          el('button', { class: 'btn btn-ghost btn-sm', type: 'button', text: 'Import JSON',
                          onclick: function () { importInput.click(); } }),
           importInput
         ])
       ]),
 
-      card('Analytics collection', [
-        field({
-          label: 'Collection endpoint (optional)',
-          type: 'url',
-          value: endpointValue,
-          hint: 'Leave empty to keep everything on-device. If set, each event is POSTed here as JSON, ' +
-                'and the Analytics tab can read pooled totals back with a GET.',
-          onInput: function (v) { A.setEndpoint(v.trim()); }
-        }),
-        field({
-          label: 'Don’t record my own visits in this browser',
-          type: 'checkbox',
-          value: optedOut,
-          onInput: function (v) {
-            try {
-              if (v) localStorage.setItem(A.OPTOUT_KEY, '1');
-              else localStorage.removeItem(A.OPTOUT_KEY);
-            } catch (e) { /* ignore */ }
-            toast(v ? 'Your visits are excluded' : 'Your visits are counted again');
-          }
-        })
+      card('Version history', [versionHistory()]),
+
+      card('Account', [
+        el('p', { class: 'hint', text: 'Signed in as ' + (state.user ? state.user.email : '—') }),
+        passwordCard()
       ]),
 
-      card('Passcode', [
-        (function () {
-          var next = el('input', { type: 'password', placeholder: 'New passcode (min 4 characters)' });
-          next.style.cssText = 'width:100%;padding:10px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font:inherit;margin-bottom:10px';
-          return el('div', {}, [
-            next,
-            el('button', {
-              class: 'btn btn-ghost btn-sm', type: 'button', text: 'Change passcode',
-              onclick: function () {
-                if (next.value.length < 4) { window.alert('Use at least 4 characters.'); return; }
-                hashPass(next.value).then(function (h) {
-                  try { localStorage.setItem(PASS_KEY, h); } catch (e) { /* ignore */ }
-                  next.value = '';
-                  toast('Passcode updated');
-                });
-              }
-            })
-          ]);
-        })(),
+      card('Analytics', [
         el('p', { class: 'hint', text:
-          'Stored as a hash in this browser only — clearing site data resets it, and it does not ' +
-          'protect the files themselves. Keep admin.html out of your deploy if the site is public.' })
+          'Events are recorded server-side and kept for 400 days by default (set EVENT_RETENTION_DAYS ' +
+          'to change it). Visitors are identified by a hash of IP + user agent + a salt that rotates ' +
+          'daily, so nothing is stored on their device and the hashes cannot be chained across days.' }),
+        el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px' }, [
+          el('a', { class: 'btn btn-ghost btn-sm', href: '/api/stats/export.csv?days=365',
+                    text: 'Export last 12 months (CSV)' })
+        ])
       ]),
 
       card('Danger zone', [
-        el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, [
-          el('button', {
-            class: 'btn btn-ghost btn-sm', type: 'button', text: 'Discard draft changes',
-            onclick: function () {
-              if (!window.confirm('Discard every unpublished change and reload content.json?')) return;
-              state.content = clone(state.published);
-              try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
-              touch(); render(); toast('Draft discarded');
-            }
-          }),
-          el('button', {
-            class: 'btn btn-ghost btn-sm', type: 'button', text: 'Clear analytics on this browser',
-            onclick: function () {
-              if (!window.confirm('Delete the local event log? Data on a collection endpoint is untouched.')) return;
-              A.clear();
-              render();
-              toast('Local analytics cleared');
-            }
-          })
-        ])
+        el('button', {
+          class: 'btn btn-ghost btn-sm', type: 'button', text: 'Discard unsaved changes',
+          onclick: function () {
+            if (!isDirty()) { toast('Nothing to discard'); return; }
+            if (!window.confirm('Discard every unsaved change and reload the published version?')) return;
+            state.content = clone(state.published);
+            try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
+            touch(); render(); toast('Discarded');
+          }
+        })
       ])
     ];
   }
-
   /* =============================================================
      8. Shell
      ============================================================= */
@@ -1249,44 +1157,65 @@
     }
   }
 
-  function publish() {
-    download('content.json', JSON.stringify(state.content, null, 2) + '\n');
-    toast('content.json downloaded — drop it next to index.html');
+  function save() {
+    if (!isDirty()) { toast('Nothing to save'); return; }
+    var btn = document.getElementById('btn-save');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    api('/api/content', { method: 'PUT', body: { content: state.content } })
+      .then(function (res) {
+        state.published = clone(state.content);
+        state.version = res.version;
+        try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
+        paintStatus();
+        toast('Published — version #' + res.version + ' is live');
+      })
+      .catch(function (err) {
+        window.alert('Save failed: ' + err.message + ' — your draft is safe in this browser.');
+      })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = 'Save & publish';
+      });
+  }
+
+  function loadContent() {
+    return api('/api/content').then(function (data) {
+      state.published = data;
+      return data;
+    });
   }
 
   function wireTopbar() {
-    document.getElementById('btn-publish').addEventListener('click', publish);
-
-    document.getElementById('btn-copy').addEventListener('click', function () {
-      var text = JSON.stringify(state.content, null, 2);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text)
-          .then(function () { toast('JSON copied'); })
-          .catch(function () { window.prompt('Copy the JSON below:', text); });
-      } else {
-        window.prompt('Copy the JSON below:', text);
-      }
-    });
+    document.getElementById('btn-save').addEventListener('click', save);
 
     document.getElementById('btn-preview').addEventListener('click', function () {
       try {
         sessionStorage.setItem(PREVIEW_KEY, JSON.stringify(state.content));
-      } catch (e) { /* the tab will just show published content */ }
+      } catch (e) { /* the tab will just show the published version */ }
       // No `noopener` here on purpose: a noopener window starts with an empty
       // sessionStorage, and the draft is handed over through exactly that.
       // Same origin, our own page, so there is nothing to isolate from.
-      window.open('index.html', '_blank');
-      toast('Preview opened — that tab shows your draft');
+      window.open('/', '_blank');
+      toast('Preview opened — that tab shows your unsaved draft');
     });
 
     document.getElementById('btn-revert').addEventListener('click', function () {
-      if (!isDirty()) { toast('Nothing to revert'); return; }
-      if (!window.confirm('Discard every unpublished change?')) return;
+      if (!isDirty()) { toast('Nothing to discard'); return; }
+      if (!window.confirm('Discard every unsaved change?')) return;
       state.content = clone(state.published);
       try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
       touch();
       render();
-      toast('Reverted to content.json');
+      toast('Back to the published version');
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', function () {
+      if (isDirty() && !window.confirm('You have unsaved changes. Sign out anyway?')) return;
+      api('/api/auth/logout', { method: 'POST' })
+        .catch(function () { /* signing out locally is enough */ })
+        .then(function () { location.href = '/admin'; });
     });
 
     window.addEventListener('beforeunload', function (e) {
@@ -1296,18 +1225,27 @@
     });
   }
 
+  function fail(message, detail) {
+    var panel = document.getElementById('panel');
+    clear(panel);
+    panel.appendChild(panelHead(message, ''));
+    panel.appendChild(el('div', { class: 'callout is-warn', html: detail }));
+    document.getElementById('status').textContent = 'not loaded';
+  }
+
   function boot() {
-    document.getElementById('shell').classList.add('is-live');
     // styles.css sets scroll-behavior:smooth for the site's anchor nav; in the
     // admin it turns every tab switch into a visible slide, so opt out.
     document.documentElement.style.scrollBehavior = 'auto';
     wireTopbar();
 
-    fetch('content.json', { cache: 'no-cache' })
-      .then(function (res) { return res.ok ? res.json() : Promise.reject(new Error('HTTP ' + res.status)); })
+    api('/api/auth/me')
+      .then(function (me) {
+        state.user = me;
+        document.getElementById('who').textContent = me.email;
+        return loadContent();
+      })
       .then(function (published) {
-        state.published = published;
-
         var draft = null;
         try {
           var raw = localStorage.getItem(DRAFT_KEY);
@@ -1315,7 +1253,7 @@
         } catch (e) { /* ignore a corrupt draft */ }
 
         state.content = draft || clone(published);
-        if (draft) toast('Restored your unpublished draft');
+        if (draft) toast('Restored your unsaved draft');
 
         try {
           var saved = localStorage.getItem(TAB_KEY);
@@ -1325,18 +1263,12 @@
         render();
       })
       .catch(function (err) {
-        var panel = document.getElementById('panel');
-        clear(panel);
-        panel.appendChild(panelHead('Can’t load content.json', ''));
-        panel.appendChild(el('div', { class: 'callout is-warn', html:
+        fail('Can’t load the site content',
           '<strong>' + escapeHtml(String(err.message || err)) + '</strong><br>' +
-          'The admin reads <code>content.json</code> over HTTP. Opening this file directly from disk ' +
-          '(<code>file://</code>) blocks that fetch — serve the folder instead:<br><br>' +
-          '<code>python -m http.server 8000</code> &nbsp;then&nbsp; ' +
-          '<code>http://localhost:8000/admin.html</code>' }));
-        document.getElementById('status').textContent = 'not loaded';
+          'The server answered, but not with content. Check the service logs: ' +
+          '<code>journalctl -u portfolio -n 50</code>');
       });
   }
 
-  initGate(boot);
+  boot();
 })();

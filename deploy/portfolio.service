@@ -1,0 +1,42 @@
+# systemd unit for the portfolio server.
+#
+#   sudo cp deploy/portfolio.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now portfolio
+#   sudo systemctl status portfolio
+#
+# Adjust User and the two paths if the checkout lives somewhere else.
+
+[Unit]
+Description=Jacob Fletcher portfolio site (CMS + analytics)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/portfolio/server
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOST=127.0.0.1
+Environment=SITE_ROOT=/var/www/portfolio/public
+Environment=DATA_DIR=/var/lib/portfolio
+# Environment=EVENT_RETENTION_DAYS=400
+
+# The process needs to write the SQLite file and nothing else on the disk.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/portfolio
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=portfolio
+
+[Install]
+WantedBy=multi-user.target
