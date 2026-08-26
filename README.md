@@ -5,8 +5,13 @@ A single-page portfolio/résumé site. No build step, no dependencies — just s
 ## Structure
 ```
 index.html      One page: Demo Reel → About Me → Work History → Projects → References
+content.json    Every editable string on the page — the source of truth
 styles.css      Styling (responsive; palette + motifs documented at the top of the file)
-script.js       Click-to-load video facades + footer year
+script.js       Renders index.html from content.json; video facades; footer year
+analytics.js    First-party event log (localStorage, optional POST endpoint)
+admin.html      Admin console — edit content, read analytics
+admin.css       Admin styling (layered on styles.css, so it shares the tokens)
+admin.js        Admin behaviour
 assets/
   headshot.png                  Profile photo
   procedural-landscape.png      Hero backdrop
@@ -16,7 +21,7 @@ assets/
   project-stardust.png  editor-tool.jpg (2DVLS)  quickropes.jpg
                                 One hero image per project, in list order
   terrain-tech.jpg              Unused — awaiting a project to belong to
-  Jake_Fletcher_Resume_2026.pdf Downloadable résumé
+  Jacob_Fletcher_Resume.pdf     Downloadable résumé
 Reference/      Original source files (not used by the site)
 ```
 
@@ -58,18 +63,53 @@ python -m http.server 8000
 Any static host works — drag the folder onto **Netlify**, push to **GitHub Pages**,
 or upload to **Cloudflare Pages** / S3. No configuration required.
 
+## Admin console
+
+Serve the folder and open **`http://localhost:8000/admin.html`**. It asks for a passcode
+the first time and stores a hash of it in that browser. This is a latch, not security —
+the files sit on a public static host either way. If that matters, leave `admin.html`,
+`admin.css`, and `admin.js` out of what you deploy; the site does not need them.
+
+**Content tabs** edit `content.json` — headline and reel, bio, work history, projects,
+references, page metadata and footer. Lists reorder with ↑ ↓ and delete with ✕. Changes
+are kept as a draft in the browser, so a closed tab loses nothing, and the chip in the
+top bar says whether the draft still matches `content.json`.
+
+There is no server to save to, so publishing is a file move:
+
+1. **Preview** opens the site in a new tab rendered from your draft.
+2. **Download content.json** (or **Copy JSON**) gives you the new file.
+3. Drop it next to `index.html` and deploy.
+
+**Analytics tab** reads what `analytics.js` records: page views per day, unique visitors
+and sessions, average time on page, résumé downloads, video plays, project clicks,
+outbound clicks, sections actually scrolled into view, referrers, and devices — plus a
+raw event table and a CSV export.
+
+By default those events live in `localStorage` **on each visitor's own device**, so the
+dashboard shows the browser you open it in and nothing else. A static host has no way to
+pool them. To count every visitor, set a **collection endpoint** in Settings: each event
+is then POSTed there as JSON, and the tab reads totals back from a GET. Visitors with Do
+Not Track on are never recorded, and Settings has a switch to keep your own visits out.
+
 ## Content notes
-- Edit copy directly in `index.html`; sections are marked with numbered comment banners.
-- To swap the featured reel, change the YouTube ID in the `#reel` iframe `src`.
-- To add a project, duplicate an `<article class="project">` block. Each one holds a
-  `.project-media` hero (either an `<img>` or a video facade), then `.project-name`,
-  `.project-desc`, `.project-date`, and an optional `.project-actions` CTA row.
-- `.tag-ai` marks AI-assisted projects; `.project-tags` is the chip row above a name.
-- Portrait captures (phone screenshots) go on `.project-media.is-portrait`, which
-  letterboxes instead of cropping the frame to a ribbon.
+- Copy lives in `content.json`. `script.js` renders the page from it on load; the markup
+  in `index.html` is the fallback that shows when the file is missing or the page is
+  opened over `file://`. Edit the JSON (or use the admin), not both — if you do change
+  `index.html` by hand, mirror it in `content.json` or the JSON will win.
+- Rich fields (`lead`, `desc`, bullets, bio paragraphs) accept `<strong>`, `<em>`, `<a>`,
+  `<br>`, `<span>`, `<code>`. Everything else is stripped when the page renders.
+- To swap the featured reel, change `reel.youtubeId`.
+- To add a project, add an object to `projects.items`: `name`, `desc`, `date`, `tags`, a
+  `media` hero (`type: "image"` with `src`/`alt`, or `type: "video"` with `youtubeId`),
+  and an optional `actions` CTA row.
+- `tags: [{label, variant}]` — `variant: "ai"` marks AI-assisted work, `"vr"` the VR/XR
+  pill, `"new"` the accent chip; `""` is the plain chip.
+- Portrait captures (phone screenshots) set `media.portrait: true`, which letterboxes
+  instead of cropping the frame to a ribbon.
 - Video heroes are **facades**: a thumbnail plus a play button that swaps itself for a
-  real iframe on click (set `data-yt` to the YouTube ID). Only the hero reel embeds a
-  live player on page load, which keeps YouTube's console noise and payload down.
-- Roles worth spotlighting carry `class="job is-key"` plus a `.job-tags` row; `.tag-vr` is the VR/XR pill.
+  real iframe on click. Only the hero reel embeds a live player on page load, which keeps
+  YouTube's console noise and payload down.
+- Roles worth spotlighting set `"key": true` on the job, which draws the gradient rail.
 - There is no site nav — the page reads top to bottom.
 - Reference emails/phones were intentionally left off the public page.

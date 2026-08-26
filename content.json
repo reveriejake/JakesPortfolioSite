@@ -1,0 +1,287 @@
+{
+  "_comment": "Source of truth for every editable string on the site. Edited by admin.html, rendered by script.js. A small HTML subset is allowed in rich fields (strong, em, b, i, br, a, span, code) - everything else is stripped on render.",
+  "meta": {
+    "title": "Jacob Fletcher — Unity Game Developer & Technical Artist",
+    "description": "Jacob Fletcher — Unity Game Developer, VR/XR Engineer, and Technical Artist. Production experience across gameplay, multiplayer, real-time 3D, and tools.",
+    "ogTitle": "Jacob Fletcher — Unity Game Developer & Technical Artist",
+    "ogDescription": "Unity developer and technical artist. VR/XR, multiplayer, real-time 3D, tools.",
+    "ogImage": "assets/headshot.png"
+  },
+  "reel": {
+    "eyebrow": "VR/XR Engineer · Unity Game Developer · Technical Artist",
+    "name": "Jacob Fletcher",
+    "lead": "Seven years building <strong>VR/XR</strong> in production — senior VR engineering at <strong>ACE</strong>, HoloLens and immersive prototypes at <strong>Microsoft</strong>. I work across gameplay, multiplayer, real-time 3D, technical art, and the tools that bring them together.",
+    "creds": [
+      { "key": "ACE", "text": "Senior VR/XR Engineer · scaled 150 → <strong>50,000+</strong> monthly users" },
+      { "key": "Microsoft", "text": "HoloLens XR developer & senior technical artist" }
+    ],
+    "youtubeId": "4gKCksgTrr0",
+    "videoTitle": "Jake Fletcher — 2026 Demo Reel",
+    "captionTag": "2026 Demo Reel",
+    "captionText": "VR/XR gameplay, technical art, and real-time 3D from production work at <strong>ACE</strong> and <strong>Microsoft</strong>.",
+    "actions": [
+      { "label": "See the Work", "href": "#projects", "style": "primary" },
+      { "label": "Download Résumé (PDF)", "href": "assets/Jacob_Fletcher_Resume.pdf", "style": "ghost" },
+      { "label": "LinkedIn", "href": "https://linkedin.com/in/jacobfletcher", "style": "ghost" }
+    ]
+  },
+  "about": {
+    "title": "About Me",
+    "index": "01",
+    "photo": "assets/headshot.png",
+    "photoAlt": "Photo of Jacob Fletcher",
+    "paragraphs": [
+      "I’m a <strong>creative technologist</strong> specializing in real-time 3D, <strong>VR/XR</strong>, and interactive experiences. Most of my career has been spent working at the intersection of engineering, technical art, and production — turning ideas into experiences that actually work in the real world.",
+      "Most recently, I was a Senior Software Engineer, VR/XR at <strong>ACE</strong>, where I helped develop and scale live-service <strong>VR</strong> experiences from roughly 150 users to <strong>almost 50,000 monthly users</strong>. Before that, I worked at <strong>Microsoft</strong>, building <strong>HoloLens</strong> experiences and immersive prototypes before moving into technical art and production for Azure’s executive communications.",
+      "My work covers everything from <strong>VR interaction</strong>, gameplay and multiplayer to rendering, 3D content, UI, tools, optimization, and backend systems. I’ve also shipped dozens of mobile games across iOS and Android and released several Unity Asset Store tools.",
+      "What I bring is the ability to move between disciplines when a project needs it. I can write the code, build the tools, solve the rendering problem, work with artists and designers, and help turn a rough idea into a polished, production-ready experience."
+    ],
+    "contacts": [
+      { "label": "reveriejake87@gmail.com", "href": "mailto:reveriejake87@gmail.com" },
+      { "label": "LinkedIn", "href": "https://linkedin.com/in/jacobfletcher" },
+      { "label": "YouTube", "href": "https://www.youtube.com/@jaflegames" }
+    ]
+  },
+  "experience": {
+    "title": "Work History",
+    "index": "02",
+    "jobs": [
+      {
+        "role": "Senior Software Engineer, VR/XR",
+        "org": "ACE",
+        "dates": "Jul 2023 – May 2026",
+        "key": true,
+        "tags": [
+          { "label": "VR/XR", "variant": "vr" },
+          { "label": "Photon Multiplayer", "variant": "" },
+          { "label": "Unity / C#", "variant": "" },
+          { "label": "Live Service", "variant": "" }
+        ],
+        "bullets": [
+          "Joined this <strong>VR</strong> product at an early stage with roughly 150 users and helped scale it to <strong>50,000+ monthly users</strong> by shipping production Unity features, stabilizing workflows, and improving front-end architecture.",
+          "Refactored major portions of the game from the ground up — improving maintainability, scalability, performance, and day-to-day iteration speed for gameplay, UI, and <strong>VR/XR</strong> systems.",
+          "Implemented Photon PUN multiplayer systems, <strong>VR interactions</strong>, customizable weapons, projectile behavior, player-facing UI, and internal gameplay tooling.",
+          "Built editor workflows, 3D assets, materials, and technical-art pipeline support that helped engineering, art, and product teams iterate faster on production-ready content.",
+          "Integrated Unity client code with Bubble services and supported the Bubble-to-AWS migration — subscriptions, user management, API integration, Git/Jira delivery, and production issue resolution.",
+          "Used AI tools such as Claude and ChatGPT for code review, optimization passes, debugging support, and refactoring analysis while retaining final engineering ownership."
+        ]
+      },
+      {
+        "role": "Senior Technical Artist & Producer",
+        "org": "Microsoft",
+        "dates": "Jun 2020 – May 2023",
+        "key": true,
+        "tags": [
+          { "label": "Technical Art", "variant": "" },
+          { "label": "3D / Motion", "variant": "" },
+          { "label": "Azure Comms", "variant": "" }
+        ],
+        "bullets": [
+          "Supported executive-level Azure communications, quarterly all-hands, weekly fireside chats, video production, and high-visibility presentations — coordinating complex technical and creative requirements.",
+          "Owned end-to-end production workflows for live and recorded communications, balancing creative direction, technical setup, editing, asset delivery, stakeholder feedback, and deadline-driven execution.",
+          "Created motion graphics, 3D art, animation, rendered visuals, photo/video edits, and live-event assets using Maya, Cinema 4D, Blender, Adobe tools, OBS, and Teams broadcast workflows."
+        ]
+      },
+      {
+        "role": "Unity Developer, VR/XR",
+        "org": "Microsoft / Robert Half",
+        "dates": "Feb 2019 – Jun 2020",
+        "key": true,
+        "tags": [
+          { "label": "VR/XR", "variant": "vr" },
+          { "label": "HoloLens", "variant": "" },
+          { "label": "Spatial Computing", "variant": "" }
+        ],
+        "bullets": [
+          "Built Unity-based <strong>HoloLens</strong> demos, immersive prototypes, 3D models, animations, rendered videos, and presentation-ready <strong>XR experiences</strong> alongside optical engineers, creative leadership, and product stakeholders.",
+          "Translated technical product concepts into interactive experiences and visual prototypes that communicated device capabilities, UX direction, and spatial-computing interaction models."
+        ]
+      },
+      {
+        "role": "Lead Maintenance Mechanic A",
+        "org": "Boeing",
+        "dates": "Jul 2008 – Feb 2019",
+        "key": false,
+        "tags": [
+          { "label": "Team Lead", "variant": "" },
+          { "label": "Robotics", "variant": "" },
+          { "label": "CNC", "variant": "" },
+          { "label": "Preventative Maintenance", "variant": "" }
+        ],
+        "bullets": [
+          "Led a team of mechanics — assigning tasks, planning work, and coordinating day-to-day coverage.",
+          "Created preventative maintenance plans that kept production equipment running and reduced unplanned downtime.",
+          "Responded to reactive calls to repair <strong>robotics and CNC machines</strong> on the production floor.",
+          "Troubleshot issues with robotics and CNC machines, diagnosing faults and returning equipment to service."
+        ]
+      },
+      {
+        "role": "Freelance Game Developer",
+        "org": "Independent",
+        "dates": "2008 – Present",
+        "key": false,
+        "tags": [],
+        "bullets": [
+          "Over a decade of independent work across many projects. Created the Unity 2.0 Terrain demo for Unity's 2.0 release, shipped over a dozen independent mobile games, and released 2 successful Unity Asset Store assets."
+        ]
+      },
+      {
+        "role": "Stagehand · Photographer · Cook · Luthier",
+        "org": "Early Career",
+        "dates": "Jan 2004 – Jul 2008",
+        "key": false,
+        "tags": [
+          { "label": "Live Events", "variant": "" },
+          { "label": "Photography", "variant": "" },
+          { "label": "Hospitality", "variant": "" },
+          { "label": "Instrument Making", "variant": "" }
+        ],
+        "bullets": [
+          "Worked as a stagehand setting up stage equipment for bands.",
+          "Photographer for hire, running my own studio in an art center.",
+          "Cooked at various sit-down restaurants.",
+          "Worked as a luthier building harps for Rees Harps."
+        ]
+      }
+    ]
+  },
+  "projects": {
+    "title": "Projects",
+    "index": "03",
+    "intro": "Shipped products, games, and tools — from live-service <strong>VR</strong> to indie mobile titles and Unity Asset Store releases.",
+    "items": [
+      {
+        "name": "ACE",
+        "desc": "Live-service <strong>VR</strong> shooting-sports training built in Unity — headset-based marksmanship on virtual ranges. Joined at roughly 150 users and helped scale the product to almost 50,000 monthly users.",
+        "date": "Jul 2023 – May 2026",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/ace.jpg", "alt": "A shooter in a Quest headset aiming a tracked pistol at a steel target on a virtual range", "portrait": true },
+        "actions": [{ "label": "Visit acexr.com →", "href": "https://www.acexr.com/", "style": "primary" }]
+      },
+      {
+        "name": "Studio Legends",
+        "desc": "A game built from the ground up in Unity, featuring custom building and terrain systems. The techlog walks through the real-time systems behind it.",
+        "date": "In development",
+        "tags": [],
+        "media": { "type": "video", "youtubeId": "ALbZ9YaurHw", "videoTitle": "Studio Legends — Techlog: Building & Terrain Systems", "ariaLabel": "Play the Studio Legends techlog", "portrait": false },
+        "actions": [{ "label": "Visit playstudiolegends.com →", "href": "https://playstudiolegends.com", "style": "primary" }]
+      },
+      {
+        "name": "BookJake.com",
+        "desc": "My own booking and estimating site. Describe what you want built and get a number in under a minute; submit it and it becomes a written scope and a fixed-fee proposal — no sales call, no email gate. Work is priced as deliverables and milestones, with live availability from a calendar.",
+        "date": "2026",
+        "tags": [{ "label": "AI-assisted", "variant": "ai" }],
+        "media": { "type": "image", "src": "assets/bookjake.jpg", "alt": "BookJake.com — a dark landing page reading Build something. Get a number., with service tiles priced by hours", "portrait": false },
+        "actions": [{ "label": "Visit bookjake.com →", "href": "https://bookjake.com", "style": "primary" }]
+      },
+      {
+        "name": "Aupex.dev",
+        "desc": "A marketplace connecting companies with senior engineering, art, and production talent for project-based work. Every bid arrives as the same structured statement of work, so milestones carry their own hours, dates, and cost — the total is derived rather than asserted, and assumptions and exclusions are first-class fields agreed before work starts.",
+        "date": "2026",
+        "tags": [{ "label": "AI-assisted", "variant": "ai" }],
+        "media": { "type": "image", "src": "assets/aupex.jpg", "alt": "Aupex.dev — a talent marketplace landing page beside a structured statement of work with milestones and costs", "portrait": false },
+        "actions": [{ "label": "Visit aupex.dev →", "href": "https://aupex.dev", "style": "primary" }]
+      },
+      {
+        "name": "SOW Generator",
+        "desc": "A statement-of-work builder. Fill in parties, rate, and deliverables and it renders a formatted SOW live beside the form, totalling hours and cost as you type. Drafts with AI, and exports to PDF, Markdown, or JSON.",
+        "date": "2026",
+        "tags": [{ "label": "AI-assisted", "variant": "ai" }],
+        "media": { "type": "image", "src": "assets/sow-generator.jpg", "alt": "SOW Builder — a deliverables form on the left rendering a live statement of work preview on the right", "portrait": false },
+        "actions": []
+      },
+      {
+        "name": "Balencil",
+        "desc": "A one-touch mobile balancing game — keep a hand-drawn pencil upright against the wind. Unlockable pencil skins, an eraser currency, daily rewards, and leaderboards.",
+        "date": "Date TBD",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/balencil.jpg", "alt": "Balencil title screen — a mahogany pencil balanced against a green forest backdrop", "portrait": true },
+        "actions": []
+      },
+      {
+        "name": "Overlap",
+        "desc": "A minimalist timing game — land each piece cleanly inside the ring without overlapping the last. Stars earned per run unlock alternate color themes and shape sets.",
+        "date": "Date TBD",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/overlap.jpg", "alt": "Overlap gameplay — white pieces landing inside a ring of green targets", "portrait": true },
+        "actions": []
+      },
+      {
+        "name": "Sol Defender",
+        "desc": "An arcade space-defense game — hold off waves closing in on the sun along orbital lanes, spending Dark Matter on weapon and shield upgrades as the levels escalate.",
+        "date": "Date TBD",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/sol-defender.jpg", "alt": "Sol Defender — a glowing sun ringed by orbital lanes of red and blue nodes", "portrait": false },
+        "actions": []
+      },
+      {
+        "name": "Dollar Origami",
+        "desc": "A step-by-step guide to folding origami from dollar bills — models rated by difficulty and bill count, walked through one fold at a time.",
+        "date": "Date TBD",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/dollar-origami.png", "alt": "Dollar Origami — a duck folded from a dollar bill, with step and difficulty controls", "portrait": false },
+        "actions": []
+      },
+      {
+        "name": "Balloon Animals",
+        "desc": "A kids' app of balloon animals animated in 3D — twist-by-twist playback of each build, with simple controls for browsing the collection.",
+        "date": "Date TBD",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/balloon-animals.jpg", "alt": "Balloon Animals — a red balloon dog animating in 3D against a blue sky", "portrait": false },
+        "actions": []
+      },
+      {
+        "name": "Ansel & Clair: Jurassic Dinosaurs",
+        "desc": "An educational adventure app — explore an illustrated world, photograph what you find, and arrange the shots in a travel log to repair the ship and get Ansel and Clair home.",
+        "date": "Date TBD",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/ansel-and-clair.webp", "alt": "Ansel & Clair — an illustrated exploration scene with a camera tool and travel log prompts", "portrait": false },
+        "actions": []
+      },
+      {
+        "name": "Project Stardust",
+        "desc": "A touch arcade game played across a night sky above a city skyline — trace arcs to catch falling stars and chain them into score multipliers before your lives run out.",
+        "date": "Date TBD",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/project-stardust.png", "alt": "Project Stardust running on an iPad — glowing arcs traced across a night sky above a city skyline", "portrait": false },
+        "actions": []
+      },
+      {
+        "name": "2DVLS",
+        "desc": "2D volumetric lights and shadows for Unity, released on the Unity Asset Store — real-time light meshes with a custom editor for authoring them in the scene view.",
+        "date": "Date TBD",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/editor-tool.jpg", "alt": "2DVLS editor tool — Unity scene view beside its C# source in Visual Studio", "portrait": false },
+        "actions": []
+      },
+      {
+        "name": "QuickRopes",
+        "desc": "A Unity Asset Store editor extension for building ropes, chains, and cables — editable spline control points, rigidbody and joint tuning, and a procedural link/tube mesh renderer, all authored in the scene view.",
+        "date": "2015",
+        "tags": [],
+        "media": { "type": "image", "src": "assets/quickropes.jpg", "alt": "QuickRopes key art — a rendered rope threaded between two stone blocks", "portrait": false },
+        "actions": []
+      }
+    ]
+  },
+  "references": {
+    "title": "References",
+    "index": "04",
+    "note": "Contact details available on request.",
+    "people": [
+      { "name": "Aaron Lee", "role": "Founder · AceXR", "href": "https://www.linkedin.com/in/aaleeron/", "linkLabel": "LinkedIn" },
+      { "name": "Chris Klingler", "role": "CTO · AceXR", "href": "https://www.linkedin.com/in/chrisklingler/", "linkLabel": "LinkedIn" },
+      { "name": "Sara Zin", "role": "Creative Director · Microsoft", "href": "https://www.linkedin.com/in/sarazin1/", "linkLabel": "LinkedIn" },
+      { "name": "Sadie Shields", "role": "Senior Design · Microsoft", "href": "https://www.linkedin.com/in/sadie-shields-ba52a353/", "linkLabel": "LinkedIn" }
+    ]
+  },
+  "footer": {
+    "owner": "Jacob Fletcher",
+    "links": [
+      { "label": "Email", "href": "mailto:reveriejake87@gmail.com" },
+      { "label": "LinkedIn", "href": "https://linkedin.com/in/jacobfletcher" },
+      { "label": "YouTube", "href": "https://www.youtube.com/@jaflegames" },
+      { "label": "Studio Legends", "href": "https://playstudiolegends.com" }
+    ]
+  }
+}
